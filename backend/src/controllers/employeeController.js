@@ -75,18 +75,40 @@ async function getAllEmployees(req, res) {
 }
 
 /**
- * Get employee by ID
+ * Get employee by ID.
+ *
+ * Access rules:
+ * - ADMIN / HR can view any employee's profile.
+ * - EMPLOYEE can only view their OWN profile (matched against
+ *   req.user.employee_id from the verified token, never trusted from the
+ *   URL alone).
+ * - Salary data is never returned from this generic profile endpoint,
+ *   regardless of role, to avoid leaking it through a route that wasn't
+ *   designed to be salary-access-controlled. Salary/payroll has its own
+ *   dedicated, permission-checked endpoints.
  */
 async function getEmployeeById(req, res) {
   try {
     const { id } = req.params;
+    const requestedId = parseInt(id, 10);
+    const requesterRole = (req.user.role || '').toUpperCase();
+    const isHrOrAdmin = requesterRole === 'ADMIN' || requesterRole === 'HR';
+
+    if (!isHrOrAdmin && req.user.employee_id !== requestedId) {
+      return res.status(403).json({
+        success: false,
+        error: "You don't have permission to view this employee's profile."
+      });
+    }
+
     const result = await pool.query(
-      `SELECT e.*, u.login_id, u.role, s.annual_ctc, s.net_monthly_take_home
+      `SELECT e.id, e.user_id, e.first_name, e.last_name, e.email, e.phone,
+              e.job_position, e.department, e.location, e.status, e.avatar_url,
+              e.date_of_joining, e.date_of_birth, u.login_id, u.role
        FROM employees e
        JOIN users u ON u.id = e.user_id
-       LEFT JOIN salaries s ON s.employee_id = e.id
        WHERE e.id = $1`,
-      [id]
+      [requestedId]
     );
 
     if (result.rows.length === 0) {

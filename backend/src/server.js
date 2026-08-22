@@ -1,6 +1,10 @@
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
+
+// Load and validate configuration FIRST. This will exit the process
+// immediately if JWT_SECRET (and, in production, FRONTEND_URL) is missing,
+// so we never accidentally boot with an insecure default.
+const config = require('./config');
 const pool = require('./db');
 
 const authRoutes = require('./routes/authRoutes');
@@ -8,12 +12,31 @@ const employeeRoutes = require('./routes/employeeRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const leaveRoutes = require('./routes/leaveRoutes');
 const { authenticateToken, requireRole } = require('./middleware/auth');
+const { apiLimiter } = require('./middleware/rateLimit');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = config.PORT;
 
-app.use(cors());
+// CORS is restricted to the configured frontend origin(s) rather than
+// left wide open. In development with no FRONTEND_URL set, we fall back
+// to allowing any origin so local file:// / live-server testing still
+// works, but this path is blocked outright in production (see config.js).
+const corsOptions = config.ALLOWED_ORIGINS.length > 0
+  ? {
+      origin: (origin, callback) => {
+        // Allow non-browser tools (curl/Postman) that send no Origin header.
+        if (!origin || config.ALLOWED_ORIGINS.includes(origin)) {
+          return callback(null, true);
+        }
+        return callback(new Error('Not allowed by CORS'));
+      },
+      credentials: true,
+    }
+  : {}; // development-only open CORS
+
+app.use(cors(corsOptions));
 app.use(express.json());
+app.use('/api', apiLimiter);
 
 // Initialize all required database tables safely
 const initDatabase = async () => {

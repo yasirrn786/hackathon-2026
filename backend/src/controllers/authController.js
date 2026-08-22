@@ -1,6 +1,7 @@
 const pool = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { JWT_SECRET, JWT_EXPIRES_IN, BCRYPT_SALT_ROUNDS } = require('../config');
 
 // Sign In User (Supports Email OR Login ID)
 const signin = async (req, res) => {
@@ -37,8 +38,8 @@ const signin = async (req, res) => {
     // Create JWT Token
     const token = jwt.sign(
       { id: user.id, role: user.role, login_id: user.login_id },
-      process.env.JWT_SECRET || 'dayflow_super_secret_jwt_key_2026',
-      { expiresIn: '7d' }
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN }
     );
 
     res.json({
@@ -101,60 +102,55 @@ const getMe = async (req, res) => {
   }
 };
 
-// Sign Up User (Optional manual route)
-const signup = async (req, res) => {
-  try {
-    const { login_id, email, password, role, firstName, lastName } = req.body;
+// NOTE: There is intentionally no public signup/registration endpoint here.
+//
+// Dayflow does not allow unauthenticated users to create their own account
+// or choose their own role. All accounts (EMPLOYEE, HR, ADMIN) are created
+// by an existing HR/Admin user via POST /api/employees/create-employee,
+// which is protected by authenticateToken + requireRole(['ADMIN','HR']) and
+// always derives the role from a controlled input, never from an anonymous
+// request body. If a public signup route is ever reintroduced, it becomes
+// a privilege-escalation vector (an anonymous user posting {"role":"ADMIN"}).
 
-    if (!email || !password) {
-      return res.status(400).json({ success: false, error: "Email and password are required." });
+/**
+ * Change own password. Requires the current password to be supplied so a
+ * hijacked-but-still-valid session can't silently lock the real owner out,
+ * and clears must_change_password once the user has set a new one.
+ */
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, error: 'Current and new password are required.' });
+    }
+    if (newPassword.length < 8) {
+      return res.status(400).json({ success: false, error: 'New password must be at least 8 characters.' });
     }
 
-    const userExists = await pool.query(
-      'SELECT id FROM users WHERE LOWER(email) = LOWER($1) OR (login_id = $2 AND $2 IS NOT NULL)', 
-      [email, login_id || null]
+    const userRes = await pool.query('SELECT id, password_hash FROM users WHERE id = $1', [req.user.user_id]);
+    if (userRes.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'User not found.' });
+    }
+
+    const validCurrent = await bcrypt.compare(currentPassword, userRes.rows[0].password_hash);
+    if (!validCurrent) {
+      return res.status(401).json({ success: false, error: 'Current password is incorrect.' });
+    }
+
+    const salt = await bcrypt.genSalt(BCRYPT_SALT_ROUNDS);
+    const newHash = await bcrypt.hash(newPassword, salt);
+
+    await pool.query(
+      `UPDATE users SET password_hash = $1, must_change_password = FALSE WHERE id = $2`,
+      [newHash, req.user.user_id]
     );
 
-    if (userExists.rows.length > 0) {
-      return res.status(400).json({ success: false, error: "User with this email or Login ID already exists." });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    const userLoginId = login_id || `OI${Date.now().toString().slice(-8)}`;
-
-    const client = await pool.connect();
-    try {
-      await client.query('BEGIN');
-      const newUser = await client.query(
-        'INSERT INTO users (login_id, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id, login_id, email, role',
-        [userLoginId, email, hashedPassword, (role || 'EMPLOYEE').toUpperCase()]
-      );
-
-      const newEmp = await client.query(
-        `INSERT INTO employees (user_id, first_name, last_name, email, job_position, department, location, date_of_joining, date_of_birth)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_DATE, '1995-01-01') RETURNING *`,
-        [newUser.rows[0].id, firstName || 'New', lastName || 'User', email, 'Staff', 'General', 'Office']
-      );
-
-      await client.query('COMMIT');
-
-      res.status(201).json({
-        success: true,
-        message: "User registered successfully!",
-        user: newUser.rows[0],
-        employee: newEmp.rows[0]
-      });
-    } catch (e) {
-      await client.query('ROLLBACK');
-      throw e;
-    } finally {
-      client.release();
-    }
+    res.json({ success: true, message: 'Password updated successfully.' });
   } catch (err) {
-    console.error("Signup error:", err.message);
-    res.status(500).json({ success: false, error: "Server error during registration." });
+    console.error('changePassword error:', err.message);
+    res.status(500).json({ success: false, error: 'Server error while updating password.' });
   }
 };
 
-module.exports = { signin, getMe, signup };
+module.exports = { signin, getMe, changePassword };

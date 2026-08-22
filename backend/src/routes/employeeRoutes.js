@@ -8,9 +8,12 @@ const {
 } = require('../controllers/employeeController');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 
-// Public or Authenticated routes
-router.get('/', authenticateToken, getAllEmployees);
+// Employee directory / search is an HR+ capability, not something every
+// authenticated employee should be able to browse.
+router.get('/', authenticateToken, requireRole(['ADMIN', 'HR']), getAllEmployees);
 router.get('/stats', authenticateToken, requireRole(['ADMIN', 'HR']), getAdminStats);
+// Individual profile: role/self-access check happens inside the controller,
+// since an EMPLOYEE is allowed to fetch their own record by id.
 router.get('/:id', authenticateToken, getEmployeeById);
 router.post('/create-employee', authenticateToken, requireRole(['ADMIN', 'HR']), registerEmployee);
 
