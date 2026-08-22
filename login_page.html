@@ -39,16 +39,16 @@
     </div>
 
     <!-- Error Alert Banner -->
-    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-start space-x-3">
+    <div id="login-error" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-start space-x-3">
       <i data-lucide="alert-circle" class="text-red-600 w-5 h-5 shrink-0 mt-0.5"></i>
       <div>
         <h4 class="text-sm font-semibold text-red-800">Authentication Failed</h4>
-        <p class="text-xs text-red-700 mt-0.5 leading-relaxed">Incorrect credentials. Please verify your Employee ID and password.</p>
+        <p id="login-error-message" class="text-xs text-red-700 mt-0.5 leading-relaxed">Incorrect credentials. Please verify your Employee ID and password.</p>
       </div>
     </div>
 
     <!-- Form Layout Fields -->
-    <form class="space-y-4" onsubmit="event.preventDefault();">
+    <form id="login-form" class="space-y-4" onsubmit="event.preventDefault();">
       
       <!-- Employee ID Input Node -->
       <div>
@@ -117,7 +117,7 @@
       </div>
 
       <!-- Main Action Target Trigger Button -->
-      <button type="submit" 
+      <button type="submit" id="login-submit-btn"
         class="w-full flex items-center justify-center space-x-2 bg-[#724867] hover:bg-[#5c3a53] text-white text-sm font-semibold py-3 px-4 rounded-lg shadow-md transition-all cursor-pointer mt-2">
         <span>Sign In to Dashboard</span>
         <i data-lucide="arrow-right" class="w-4 h-4"></i>
@@ -139,6 +139,63 @@
 
   <script>
     lucide.createIcons();
+
+    // Point this at wherever your backend is actually running.
+    const API_BASE_URL = 'http://localhost:5000';
+
+    const form = document.getElementById('login-form');
+    const submitBtn = document.getElementById('login-submit-btn');
+    const errorBox = document.getElementById('login-error');
+    const errorMessage = document.getElementById('login-error-message');
+
+    // Where to send each role after a successful login.
+    // Update these paths if your dashboard file names differ.
+    const ROLE_REDIRECTS = {
+      ADMIN: 'admin_panel.html',
+      HR: 'admin_panel.html',
+      MANAGER: 'dayflow_app.html',
+      EMPLOYEE: 'emploee_dashboard.html'
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      errorBox.classList.add('hidden');
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      submitBtn.disabled = true;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/signin`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          errorMessage.textContent = data.error || 'Incorrect credentials. Please try again.';
+          errorBox.classList.remove('hidden');
+          return;
+        }
+
+        // Store the JWT so other pages can make authenticated requests.
+        localStorage.setItem('dayflow_token', data.token);
+        localStorage.setItem('dayflow_role', data.role);
+        localStorage.setItem('dayflow_login_id', data.loginId);
+
+        window.location.href = ROLE_REDIRECTS[data.role] || 'emploee_dashboard.html';
+
+      } catch (err) {
+        errorMessage.textContent = 'Could not reach the server. Is the backend running?';
+        errorBox.classList.remove('hidden');
+        console.error('Login request failed:', err);
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
   </script>
 </body>
 </html>

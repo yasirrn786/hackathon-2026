@@ -3,9 +3,8 @@ const cors = require('cors');
 require('dotenv').config();
 const { Client } = require('pg');
 const pool = require('./db');
-const bcrypt = require('bcrypt');
-const crypto = require('crypto');
 const authRoutes = require('./routes/authRoutes');
+const employeeRoutes = require('./routes/employeeRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -89,67 +88,9 @@ createTables();
 // Use Auth Routes
 app.use('/api/auth', authRoutes);
 
-// 1. Employee Registration Route (Automatically generates Login ID & Temp Password)
-app.post('/api/employees/create', async (req, res) => {
-    try {
-        const { firstName, lastName, email, phone, jobPosition, location, dateOfJoining, dateOfBirth, role } = req.body;
-
-        const companyPrefix = 'OI';
-        const firstTwoFirst = firstName.substring(0, 2).toUpperCase();
-        const firstTwoLast = lastName.substring(0, 2).toUpperCase();
-        const year = new Date(dateOfJoining).getFullYear().toString();
-
-        const startOfYear = `${year}-01-01`;
-        const endOfYear = `${year}-12-31`;
-
-        const countQuery = await pool.query(
-            `SELECT COUNT(*) FROM employees WHERE date_of_joining BETWEEN $1 AND $2`,
-            [startOfYear, endOfYear]
-        );
-        const serialNumber = (parseInt(countQuery.rows[0].count) + 1).toString().padStart(4, '0');
-        const loginId = `${companyPrefix}${firstTwoFirst}${firstTwoLast}${year}${serialNumber}`;
-
-        const tempPassword = crypto.randomBytes(4).toString('hex') + '@123';
-        const salt = await bcrypt.genSalt(10);
-        const passwordHash = await bcrypt.hash(tempPassword, salt);
-
-        const client = await pool.connect();
-        try {
-            await client.query('BEGIN');
-
-            const userResult = await client.query(
-                `INSERT INTO users (login_id, email, password_hash, role, must_change_password) 
-                 VALUES ($1, $2, $3, $4, TRUE) RETURNING id, login_id`,
-                [loginId, email, passwordHash, role || 'EMPLOYEE']
-            );
-            const userId = userResult.rows[0].id;
-
-            const employeeResult = await client.query(
-                `INSERT INTO employees (user_id, first_name, last_name, phone, job_position, location, date_of_joining, date_of_birth) 
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-                [userId, firstName, lastName, phone, jobPosition, location, dateOfJoining, dateOfBirth]
-            );
-
-            await client.query('COMMIT');
-
-            res.status(201).json({
-                success: true,
-                loginId: loginId,
-                tempPassword: tempPassword,
-                employee: employeeResult.rows[0]
-            });
-        } catch (dbError) {
-            await client.query('ROLLBACK');
-            throw dbError;
-        } finally {
-            client.release();
-        }
-
-    } catch (err) {
-        console.error("Error creating employee:", err.message);
-        res.status(500).json({ success: false, error: err.message });
-    }
-});
+// Employee Registration Route (Automatically generates Login ID & Temp Password)
+// Handled by employeeController.registerEmployee via employeeService.createEmployeeAccount
+app.use('/api/employees', employeeRoutes);
 
 // 2. Attendance Check-In Route
 app.post('/api/attendance/check-in', async (req, res) => {
