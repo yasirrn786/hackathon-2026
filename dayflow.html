@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dayflow HRMS - Admin</title>
+  <!-- Stable Tailwind CSS Core CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts Inter System -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icon Framework -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .bg-workspace {
+      background-image: linear-gradient(rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.15)), url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80');
+      background-size: cover;
+      background-position: center;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .fade-out { opacity: 0; transform: translateX(8px); transition: opacity .25s ease, transform .25s ease; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col antialiased selection:bg-[#724867] selection:text-white">
+
+  <!-- ==================== SCREEN 1: LOGIN GATEWAY ==================== -->
+  <div id="login-screen" class="bg-workspace min-h-screen flex flex-col justify-between items-center p-4">
+    <!-- Header -->
+    <header class="flex flex-col items-center text-center mt-6 mb-4">
+      <div class="w-12 h-12 bg-[#724867] rounded-xl flex items-center justify-center shadow-md mb-3">
+        <i data-lucide="briefcase" class="text-white w-6 h-6"></i>
+      </div>
+      <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Dayflow</h1>
+      <p class="text-sm font-medium text-gray-600 mt-1 uppercase tracking-wider">HR Administrator Access Portal</p>
+    </header>
+
+    <!-- Login Card -->
+    <main class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-100 p-8 my-auto">
+      <div class="text-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Sign In</h2>
+        <p class="text-sm text-gray-500 mt-1">Enter your administrator credentials to access the Administrative Hub</p>
+      </div>
+
+      <!-- Error Alert Banner (Hidden by default) -->
+      <div id="login-error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-start space-x-3 hidden">
+        <i data-lucide="alert-circle" class="text-red-600 w-5 h-5 shrink-0 mt-0.5"></i>
+        <div>
+          <h4 class="text-sm font-semibold text-red-800">Authentication Failed</h4>
+          <p class="text-xs text-red-700 mt-0.5 leading-relaxed">Incorrect credentials. Please verify your entries.</p>
+        </div>
+      </div>
+
+      <form class="space-y-4" onsubmit="handleLogin(event)">
+        <!-- Employee ID -->
+        <div>
+          <label for="employee-id" class="flex items-center text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+            <i data-lucide="user-check" class="w-3.5 h-3.5 mr-1.5 text-gray-500"></i> Employee ID
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 pointer-events-none">
+              <i data-lucide="user" class="w-4 h-4"></i>
+            </span>
+            <input type="text" id="employee-id" value="EMP-10293" placeholder="e.g. EMP-10293"
+              class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50/50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#724867] focus:border-[#724867] focus:bg-white transition-colors">
+          </div>
+        </div>
+
+        <!-- Email Address -->
+        <div>
+          <label for="email" class="flex items-center text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+            <i data-lucide="mail" class="w-3.5 h-3.5 mr-1.5 text-gray-500"></i> Email Address
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 pointer-events-none">
+              <i data-lucide="at-sign" class="w-4 h-4"></i>
+            </span>
+            <input type="email" id="email" value="alex.morgan@dayflow.com" placeholder="alex.morgan@dayflow.com"
+              class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50/50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#724867] focus:border-[#724867] focus:bg-white transition-colors">
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div>
+          <div class="flex justify-between items-center mb-1.5">
+            <label for="password" class="flex items-center text-xs font-semibold text-gray-700 uppercase tracking-wide">
+              <i data-lucide="lock" class="w-3.5 h-3.5 mr-1.5 text-gray-500"></i> Password
+          </label>
+            <a href="#" class="text-xs font-medium text-[#724867] hover:underline" onclick="alert('Demo Feature: Password recovery loop is handled by your system server context.')">Forgot password?</a>
+          </div>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 pointer-events-none">
+              <i data-lucide="key-round" class="w-4 h-4"></i>
+            </span>
+            <input type="password" id="password" value="admin123" placeholder="••••••••"
+              class="block w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50/50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#724867] focus:border-[#724867] focus:bg-white transition-colors">
+            <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600" onclick="togglePasswordVisibility()">
+              <i data-lucide="eye" id="password-eye-icon" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit"
+          class="w-full flex items-center justify-center space-x-2 bg-[#724867] hover:bg-[#5c3a53] text-white text-sm font-semibold py-3 px-4 rounded-lg shadow-md transition-all cursor-pointer">
+          <span>Sign In to Administrative Hub</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </form>
+
+      <p class="text-center text-xs text-gray-400 mt-5">Not an administrator? Use the standard <a href="dayflow_app.html" class="font-semibold text-[#724867] hover:underline">Employee Portal</a> instead.</p>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full text-center mt-4 mb-4">
+      <nav class="flex justify-center space-x-4 text-xs font-medium text-gray-600">
+        <a href="#" class="hover:underline">Privacy Policy</a>
+        <span class="text-gray-400">•</span>
+        <a href="#" class="hover:underline">Terms of Service</a>
+        <span class="text-gray-400">•</span>
+        <a href="#" class="hover:underline">Help Center</a>
+      </nav>
+      <p class="text-[10px] text-gray-500 uppercase tracking-wider mt-3">&copy; 2026 Dayflow Enterprise. All Rights Reserved.</p>
+    </footer>
+  </div>
+
+
+  <!-- ==================== SCREEN 2: ADMINISTRATIVE HUB ==================== -->
+  <div id="admin-screen" class="min-h-screen flex-col hidden bg-gray-50">
+
+    <!-- Top Navigation Header -->
+    <header class="w-full bg-white border-b border-gray-100 px-6 py-3 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+      <div class="flex items-center space-x-12">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 bg-[#724867] rounded-lg flex items-center justify-center">
+            <i data-lucide="briefcase" class="text-white w-4 h-4"></i>
+          </div>
+          <span class="text-xl font-bold tracking-tight text-gray-900">Dayflow</span>
+          <span class="hidden sm:inline-block text-[10px] font-bold text-[#724867] bg-purple-50 border border-[#724867]/20 px-2 py-0.5 rounded-md uppercase tracking-wider ml-1">Admin</span>
+        </div>
+
+        <nav class="hidden md:flex items-center space-x-6">
+          <button onclick="switchAdminTab('overview')" id="admin-nav-overview" class="flex items-center space-x-1.5 text-sm font-semibold text-[#724867] bg-purple-50/50 px-3 py-1.5 rounded-lg admin-nav-btn">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            <span>Overview</span>
+          </button>
+          <button onclick="switchAdminTab('directory')" id="admin-nav-directory" class="flex items-center space-x-1.5 text-sm font-medium text-gray-600 hover:text-[#724867] transition-colors admin-nav-btn">
+            <i data-lucide="users" class="w-4 h-4"></i>
+            <span>Employees</span>
+          </button>
+          <button onclick="switchAdminTab('leave')" id="admin-nav-leave" class="flex items-center space-x-1.5 text-sm font-medium text-gray-600 hover:text-[#724867] transition-colors admin-nav-btn">
+            <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+            <span>Leave Requests</span>
+          </button>
+          <button onclick="switchAdminTab('attendance')" id="admin-nav-attendance" class="flex items-center space-x-1.5 text-sm font-medium text-gray-600 hover:text-[#724867] transition-colors admin-nav-btn">
+            <i data-lucide="radio" class="w-4 h-4"></i>
+            <span>Live Attendance</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <button class="relative p-2 text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors" onclick="alert('Notification Center: 3 new operational alerts.')">
+          <i data-lucide="bell" class="w-5 h-5"></i>
+          <span class="absolute top-1 right-1 w-2 h-2 bg-[#724867] rounded-full"></span>
+        </button>
+        <div class="flex items-center space-x-3 pl-3 border-l border-gray-100">
+          <div class="text-right hidden sm:block">
+            <h4 id="admin-header-name" class="text-xs font-bold text-gray-900">Alex Morgan</h4>
+            <p id="admin-header-role" class="text-[10px] text-gray-500 font-medium uppercase tracking-wider">HR Administrator</p>
+          </div>
+          <div class="w-9 h-9 rounded-full bg-gray-200 border border-gray-100 overflow-hidden">
+            <img id="admin-header-avatar" src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80" alt="Admin avatar" class="w-full h-full object-cover">
+          </div>
+          <button onclick="handleLogout()" class="p-2 text-gray-400 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-full transition-colors" title="Log out">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="flex-1 w-full max-w-[1400px] mx-auto p-6 flex flex-col gap-6">
+
+      <!-- Page Title Row -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Administrative Hub</h1>
+          <p id="admin-welcome-line" class="text-sm text-gray-500 mt-1">Welcome back, Alex. Monitoring 128 active personnel today.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center space-x-1.5 text-xs font-bold text-gray-500 bg-white border border-gray-200 px-3 py-2 rounded-xl shadow-sm">
+            <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+            <span>Saturday, August 22, 2026</span>
+          </div>
+          <button onclick="alert('Demo Feature: Opening the Add Employee form.')" class="flex items-center space-x-1.5 bg-[#724867] hover:bg-[#5c3a53] text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm transition-colors cursor-pointer">
+            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+            <span>Add Employee</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+          <div class="flex items-center justify-between">
+            <div class="w-9 h-9 rounded-xl bg-purple-50 flex items-center justify-center text-[#724867]">
+              <i data-lucide="users" class="w-4.5 h-4.5"></i>
+            </div>
+            <span class="flex items-center text-xs font-bold text-green-600"><i data-lucide="trending-up" class="w-3.5 h-3.5 mr-0.5"></i>+4.2%</span>
+          </div>
+          <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4">Total Headcount</p>
+          <h3 class="text-2xl font-bold text-gray-900 mt-0.5">142</h3>
+          <p class="text-xs text-gray-400 mt-1">Employees across 8 depts</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+          <div class="flex items-center justify-between">
+            <div class="w-9 h-9 rounded-xl bg-purple-50 flex items-center justify-center text-[#724867]">
+              <i data-lucide="user-check" class="w-4.5 h-4.5"></i>
+            </div>
+            <span class="flex items-center text-xs font-bold text-red-500"><i data-lucide="trending-down" class="w-3.5 h-3.5 mr-0.5"></i>-1.5%</span>
+          </div>
+          <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4">Present Today</p>
+          <h3 class="text-2xl font-bold text-gray-900 mt-0.5">128</h3>
+          <p class="text-xs text-gray-400 mt-1">90.1% attendance rate</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+          <div class="flex items-center justify-between">
+            <div class="w-9 h-9 rounded-xl bg-purple-50 flex items-center justify-center text-[#724867]">
+              <i data-lucide="clock" class="w-4.5 h-4.5"></i>
+            </div>
+          </div>
+          <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4">Leave Pending</p>
+          <h3 id="stat-leave-pending" class="text-2xl font-bold text-gray-900 mt-0.5">12</h3>
+          <p class="text-xs text-gray-400 mt-1">Requires HR action</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+          <div class="flex items-center justify-between">
+            <div class="w-9 h-9 rounded-xl bg-purple-50 flex items-center justify-center text-[#724867]">
+              <i data-lucide="trending-up" class="w-4.5 h-4.5"></i>
+            </div>
+            <span class="flex items-center text-xs font-bold text-green-600"><i data-lucide="trending-up" class="w-3.5 h-3.5 mr-0.5"></i>+0.8%</span>
+          </div>
+          <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4">Avg. Daily Hours</p>
+          <h3 class="text-2xl font-bold text-gray-900 mt-0.5">8h 24m</h3>
+          <p class="text-xs text-gray-400 mt-1">Calculated over 30 days</p>
+        </div>
+      </div>
+
+      <!-- Directory + Leave Requests -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Employee Directory -->
+        <section id="panel-directory" class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-4 mb-4">
+            <div class="flex items-center space-x-2">
+              <div class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-[#724867]">
+                <i data-lucide="users" class="w-4 h-4"></i>
+              </div>
+              <h3 class="font-bold text-gray-900 text-base">Employee Directory</h3>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="relative">
+                <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                <input id="directory-search" type="text" placeholder="Search name or ID..." oninput="filterDirectory()"
+                  class="pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-[#724867] focus:border-[#724867] focus:bg-white transition-colors w-48">
+              </div>
+              <button class="p-2 border border-gray-200 rounded-lg text-gray-500 hover:text-[#724867] hover:border-[#724867]/40 transition-colors" onclick="alert('Demo Feature: Filter by department, status, and role.')">
+                <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto -mx-2">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                  <th class="px-2 pb-2 font-bold">Personnel</th>
+                  <th class="px-2 pb-2 font-bold">Role &amp; Dept</th>
+                  <th class="px-2 pb-2 font-bold">Status</th>
+                  <th class="px-2 pb-2 font-bold text-right">Management</th>
+                </tr>
+              </thead>
+              <tbody id="directory-tbody" class="divide-y divide-gray-50 font-medium text-gray-800">
+                <tr class="directory-row hover:bg-gray-50/50 transition-colors" data-name="sophia chen senior engineer engineering">
+                  <td class="px-2 py-3.5">Senior Engineer<br><span class="text-xs text-gray-400 font-normal">Engineering</span></td>
+                  <td class="px-2 py-3.5 text-gray-600">Profile</td>
+                  <td class="px-2 py-3.5"><span class="inline-flex items-center text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-md border border-green-200/50 font-bold">Active</span></td>
+                  <td class="px-2 py-3.5 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <button class="text-gray-400 hover:text-gray-700" onclick="alert('Demo Feature: Row options for Sophia Chen.')"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
+                      <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=80&q=80" class="w-7 h-7 rounded-full object-cover" alt="Sophia Chen">
+                      <span class="font-semibold text-gray-900">Sophia Chen</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="directory-row hover:bg-gray-50/50 transition-colors" data-name="james wilson ui designer design">
+                  <td class="px-2 py-3.5">UI Designer<br><span class="text-xs text-gray-400 font-normal">Design</span></td>
+                  <td class="px-2 py-3.5 text-gray-600">Profile</td>
+                  <td class="px-2 py-3.5"><span class="inline-flex items-center text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-md border border-green-200/50 font-bold">Active</span></td>
+                  <td class="px-2 py-3.5 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <button class="text-gray-400 hover:text-gray-700" onclick="alert('Demo Feature: Row options for James Wilson.')"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
+                      <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80" class="w-7 h-7 rounded-full object-cover" alt="James Wilson">
+                      <span class="font-semibold text-gray-900">James Wilson</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="directory-row hover:bg-gray-50/50 transition-colors" data-name="amara okafor hr manager human resources">
+                  <td class="px-2 py-3.5">HR Manager<br><span class="text-xs text-gray-400 font-normal">Human Resources</span></td>
+                  <td class="px-2 py-3.5 text-gray-600">Profile</td>
+                  <td class="px-2 py-3.5"><span class="inline-flex items-center text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/50 font-bold">On Leave</span></td>
+                  <td class="px-2 py-3.5 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <button class="text-gray-400 hover:text-gray-700" onclick="alert('Demo Feature: Row options for Amara Okafor.')"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
+                      <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?auto=format&fit=crop&w=80&q=80" class="w-7 h-7 rounded-full object-cover" alt="Amara Okafor">
+                      <span class="font-semibold text-gray-900">Amara Okafor</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="directory-row hover:bg-gray-50/50 transition-colors" data-name="liam davies backend lead engineering">
+                  <td class="px-2 py-3.5">Backend Lead<br><span class="text-xs text-gray-400 font-normal">Engineering</span></td>
+                  <td class="px-2 py-3.5 text-gray-600">Profile</td>
+                  <td class="px-2 py-3.5"><span class="inline-flex items-center text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-md border border-green-200/50 font-bold">Active</span></td>
+                  <td class="px-2 py-3.5 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <button class="text-gray-400 hover:text-gray-700" onclick="alert('Demo Feature: Row options for Liam Davies.')"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
+                      <div class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><i data-lucide="image" class="w-3.5 h-3.5"></i></div>
+                      <span class="font-semibold text-gray-900">Liam Davies</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="directory-row hover:bg-gray-50/50 transition-colors" data-name="elena rossi product manager product">
+                  <td class="px-2 py-3.5">Product Manager<br><span class="text-xs text-gray-400 font-normal">Product</span></td>
+                  <td class="px-2 py-3.5 text-gray-600">Profile</td>
+                  <td class="px-2 py-3.5"><span class="inline-flex items-center text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-md border border-green-200/50 font-bold">Active</span></td>
+                  <td class="px-2 py-3.5 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <button class="text-gray-400 hover:text-gray-700" onclick="alert('Demo Feature: Row options for Elena Rossi.')"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
+                      <div class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><i data-lucide="image" class="w-3.5 h-3.5"></i></div>
+                      <span class="font-semibold text-gray-900">Elena Rossi</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p id="directory-empty-state" class="hidden text-center text-sm text-gray-400 py-8">No employees match your search.</p>
+          </div>
+
+          <div class="flex items-center justify-between pt-4 mt-2 border-t border-gray-100">
+            <p class="text-xs text-gray-400 font-medium">Showing 5 of 142 employees</p>
+            <button onclick="alert('Demo Feature: Loading the complete employee directory.')" class="text-xs font-bold text-[#724867] hover:underline flex items-center space-x-1">
+              <span>View Complete Directory</span>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </section>
+
+        <!-- Leave Requests -->
+        <section id="panel-leave" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col">
+          <div class="flex items-center space-x-2 border-b border-gray-100 pb-4 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center text-orange-500">
+              <i data-lucide="clock" class="w-4 h-4"></i>
+            </div>
+            <h3 class="font-bold text-gray-900 text-base">Leave Requests</h3>
+          </div>
+
+          <div id="leave-requests-list" class="flex flex-col gap-4">
+            <div class="leave-card border border-gray-100 rounded-xl p-4" data-days="2" data-name="Marcus Thompson">
+              <div class="flex items-start justify-between">
+                <div>
+                  <h4 class="font-bold text-gray-900 text-sm">Marcus Thompson</h4>
+                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">Sick Leave</p>
+                </div>
+                <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md uppercase tracking-wider">2 Days</span>
+              </div>
+              <p class="flex items-center text-xs text-gray-400 mt-2"><i data-lucide="calendar" class="w-3.5 h-3.5 mr-1.5"></i>Oct 28 - Oct 29</p>
+              <div class="flex items-center gap-2 mt-3">
+                <button onclick="resolveLeaveRequest(this, 'reject')" class="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-red-600 border border-red-200 hover:bg-red-50 py-2 rounded-lg transition-colors cursor-pointer">
+                  <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>Reject
+                </button>
+                <button onclick="resolveLeaveRequest(this, 'approve')" class="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-white bg-green-700 hover:bg-green-600 py-2 rounded-lg transition-colors cursor-pointer">
+                  <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>Approve
+                </button>
+              </div>
+            </div>
+
+            <div class="leave-card border border-gray-100 rounded-xl p-4" data-days="5" data-name="Isabella Grant">
+              <div class="flex items-start justify-between">
+                <div>
+                  <h4 class="font-bold text-gray-900 text-sm">Isabella Grant</h4>
+                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">Vacation</p>
+                </div>
+                <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md uppercase tracking-wider">5 Days</span>
+              </div>
+              <p class="flex items-center text-xs text-gray-400 mt-2"><i data-lucide="calendar" class="w-3.5 h-3.5 mr-1.5"></i>Nov 05 - Nov 10</p>
+              <div class="flex items-center gap-2 mt-3">
+                <button onclick="resolveLeaveRequest(this, 'reject')" class="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-red-600 border border-red-200 hover:bg-red-50 py-2 rounded-lg transition-colors cursor-pointer">
+                  <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>Reject
+                </button>
+                <button onclick="resolveLeaveRequest(this, 'approve')" class="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-white bg-green-700 hover:bg-green-600 py-2 rounded-lg transition-colors cursor-pointer">
+                  <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>Approve
+                </button>
+              </div>
+            </div>
+
+            <div class="leave-card border border-gray-100 rounded-xl p-4" data-days="1" data-name="David Kim">
+              <div class="flex items-start justify-between">
+                <div>
+                  <h4 class="font-bold text-gray-900 text-sm">David Kim</h4>
+                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">Personal</p>
+                </div>
+                <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md uppercase tracking-wider">1 Day</span>
+              </div>
+              <p class="flex items-center text-xs text-gray-400 mt-2"><i data-lucide="calendar" class="w-3.5 h-3.5 mr-1.5"></i>Oct 31</p>
+              <div class="flex items-center gap-2 mt-3">
+                <button onclick="resolveLeaveRequest(this, 'reject')" class="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-red-600 border border-red-200 hover:bg-red-50 py-2 rounded-lg transition-colors cursor-pointer">
+                  <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>Reject
+                </button>
+                <button onclick="resolveLeaveRequest(this, 'approve')" class="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-white bg-green-700 hover:bg-green-600 py-2 rounded-lg transition-colors cursor-pointer">
+                  <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>Approve
+                </button>
+              </div>
+            </div>
+
+            <p id="leave-empty-state" class="hidden text-center text-sm text-gray-400 py-6">All caught up — no pending requests.</p>
+          </div>
+
+          <button onclick="alert('Demo Feature: Loading all 12 pending leave requests.')" class="mt-4 w-full border border-gray-200 hover:border-[#724867]/40 hover:text-[#724867] text-gray-700 text-xs font-bold py-2.5 rounded-xl transition-colors cursor-pointer">
+            View All Requests (<span id="leave-total-count">12</span>)
+          </button>
+        </section>
+      </div>
+
+      <!-- Today's Live Attendance -->
+      <section id="panel-attendance" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center text-teal-600">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+            </div>
+            <h3 class="font-bold text-gray-900 text-base">Today's Live Attendance</h3>
+          </div>
+          <span class="flex items-center gap-1.5 text-[10px] font-bold text-green-600 uppercase tracking-wider">
+            <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>Live Monitoring
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div class="border border-gray-100 rounded-xl p-4">
+            <div class="flex items-start justify-between">
+              <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=80&q=80" class="w-9 h-9 rounded-full object-cover" alt="Sophia Chen">
+              <span class="text-[10px] font-bold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-md uppercase tracking-wider">On-Time</span>
+            </div>
+            <h4 class="font-bold text-gray-900 text-sm mt-3">Sophia Chen</h4>
+            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">EMP-001</p>
+            <div class="flex items-center justify-between text-xs mt-3 pt-3 border-t border-dashed border-gray-100">
+              <div><p class="text-[10px] text-gray-400 font-bold uppercase">In</p><p class="font-bold text-gray-800">08:45 AM</p></div>
+              <div class="text-right"><p class="text-[10px] text-gray-400 font-bold uppercase">Out</p><p class="font-bold text-gray-400">--</p></div>
+            </div>
+          </div>
+
+          <div class="border border-gray-100 rounded-xl p-4">
+            <div class="flex items-start justify-between">
+              <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80" class="w-9 h-9 rounded-full object-cover" alt="James Wilson">
+              <span class="text-[10px] font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md uppercase tracking-wider">Late</span>
+            </div>
+            <h4 class="font-bold text-gray-900 text-sm mt-3">James Wilson</h4>
+            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">EMP-002</p>
+            <div class="flex items-center justify-between text-xs mt-3 pt-3 border-t border-dashed border-gray-100">
+              <div><p class="text-[10px] text-gray-400 font-bold uppercase">In</p><p class="font-bold text-gray-800">09:12 AM</p></div>
+              <div class="text-right"><p class="text-[10px] text-gray-400 font-bold uppercase">Out</p><p class="font-bold text-gray-400">--</p></div>
+            </div>
+          </div>
+
+          <div class="border border-gray-100 rounded-xl p-4">
+            <div class="flex items-start justify-between">
+              <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><i data-lucide="image" class="w-4 h-4"></i></div>
+              <span class="text-[10px] font-bold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-md uppercase tracking-wider">On-Time</span>
+            </div>
+            <h4 class="font-bold text-gray-900 text-sm mt-3">Elena Rossi</h4>
+            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">EMP-005</p>
+            <div class="flex items-center justify-between text-xs mt-3 pt-3 border-t border-dashed border-gray-100">
+              <div><p class="text-[10px] text-gray-400 font-bold uppercase">In</p><p class="font-bold text-gray-800">08:55 AM</p></div>
+              <div class="text-right"><p class="text-[10px] text-gray-400 font-bold uppercase">Out</p><p class="font-bold text-gray-400">--</p></div>
+            </div>
+          </div>
+
+          <div class="border border-gray-100 rounded-xl p-4">
+            <div class="flex items-start justify-between">
+              <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><i data-lucide="image" class="w-4 h-4"></i></div>
+              <span class="text-[10px] font-bold text-[#724867] bg-purple-50 border border-[#724867]/20 px-2 py-0.5 rounded-md uppercase tracking-wider">Early</span>
+            </div>
+            <h4 class="font-bold text-gray-900 text-sm mt-3">Liam Davies</h4>
+            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">EMP-004</p>
+            <div class="flex items-center justify-between text-xs mt-3 pt-3 border-t border-dashed border-gray-100">
+              <div><p class="text-[10px] text-gray-400 font-bold uppercase">In</p><p class="font-bold text-gray-800">08:30 AM</p></div>
+              <div class="text-right"><p class="text-[10px] text-gray-400 font-bold uppercase">Out</p><p class="font-bold text-gray-400">--</p></div>
+            </div>
+          </div>
+
+          <button onclick="alert('Demo Feature: Loading the full live attendance monitor grid.')" class="border border-dashed border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center text-center hover:border-[#724867]/40 hover:bg-purple-50/30 transition-colors cursor-pointer">
+            <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 mb-2">
+              <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+            </div>
+            <h4 class="font-bold text-gray-900 text-sm">Monitor Full Grid</h4>
+            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">Refresh every 30s</p>
+          </button>
+        </div>
+      </section>
+
+      <!-- System Announcement Broadcast -->
+      <section class="relative overflow-hidden rounded-2xl p-8 text-white" style="background: linear-gradient(135deg, #3d2438, #5c3a53 55%, #724867);">
+        <div class="absolute -right-6 -top-6 w-40 h-40 opacity-10">
+          <i data-lucide="layout-grid" class="w-full h-full"></i>
+        </div>
+        <div class="relative max-w-2xl">
+          <div class="flex items-center space-x-2 text-[10px] font-bold text-purple-200 uppercase tracking-wider">
+            <i data-lucide="briefcase" class="w-3.5 h-3.5"></i>
+            <span>HR Alert Hub</span>
+          </div>
+          <h2 class="text-2xl font-bold tracking-tight mt-2">System Announcement Broadcast</h2>
+          <p class="text-sm text-purple-100/90 mt-2 leading-relaxed">The quarterly benefits enrollment window starts in 48 hours. Ensure all employee data is verified before the system lock.</p>
+          <div class="flex items-center gap-3 mt-5">
+            <button onclick="alert('Demo Feature: Opening the announcement composer.')" class="bg-white/15 hover:bg-white/25 border border-white/20 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition-colors cursor-pointer">Draft Announcement</button>
+            <button onclick="alert('Demo Feature: Loading past broadcasts.')" class="border border-white/30 hover:bg-white/10 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition-colors cursor-pointer">View Broadcast History</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full bg-white border-t border-gray-100 px-6 py-4 mt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-semibold text-gray-500 tracking-wide">
+      <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+        <div class="flex items-center space-x-1.5 text-green-600 bg-green-50 px-2 py-1 rounded-md border border-green-200/30">
+          <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+          <span class="text-[10px] uppercase font-bold tracking-wider">System Status: Connected Operational</span>
+        </div>
+      </div>
+      <p class="text-[10px] font-bold text-gray-400 uppercase">&copy; 2026 Dayflow HRMS System Operations Ecosystem.</p>
+    </footer>
+  </div>
+
+
+  <!-- ==================== LOGIC IMPLEMENTATION BACKEND STATE ENGINE ==================== -->
+  <script>
+    // Local In-Memory Admin Account Simulation
+    const ADMIN_ACCOUNT = {
+      employeeId: "EMP-10293",
+      email: "alex.morgan@dayflow.com",
+      password: "admin123",
+      name: "Alex Morgan",
+      role: "HR Administrator",
+      avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80"
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+    });
+
+    function togglePasswordVisibility() {
+      const passField = document.getElementById("password");
+      if (passField.type === "password") {
+        passField.type = "text";
+        document.getElementById("password-eye-icon").setAttribute("data-lucide", "eye-off");
+      } else {
+        passField.type = "password";
+        document.getElementById("password-eye-icon").setAttribute("data-lucide", "eye");
+      }
+      lucide.createIcons();
+    }
+
+    // Login Submission Logic Processing Node Route
+    function handleLogin(event) {
+      event.preventDefault();
+      const inputEmpId = document.getElementById("employee-id").value.trim();
+      const inputEmail = document.getElementById("email").value.trim();
+      const inputPass = document.getElementById("password").value;
+      const errorMsgBox = document.getElementById("login-error");
+
+      errorMsgBox.classList.add("hidden");
+
+      if (inputEmpId === ADMIN_ACCOUNT.employeeId && inputEmail === ADMIN_ACCOUNT.email && inputPass === ADMIN_ACCOUNT.password) {
+        document.getElementById("admin-header-name").textContent = ADMIN_ACCOUNT.name;
+        document.getElementById("admin-header-role").textContent = ADMIN_ACCOUNT.role;
+        document.getElementById("admin-header-avatar").src = ADMIN_ACCOUNT.avatar;
+        document.getElementById("admin-welcome-line").textContent = `Welcome back, ${ADMIN_ACCOUNT.name.split(' ')[0]}. Monitoring 128 active personnel today.`;
+
+        document.getElementById("login-screen").classList.add("hidden");
+        const adminScreen = document.getElementById("admin-screen");
+        adminScreen.classList.remove("hidden");
+        adminScreen.classList.add("flex");
+      } else {
+        errorMsgBox.querySelector("h4").textContent = "Authentication Failed";
+        errorMsgBox.querySelector("p").textContent = "Incorrect credentials. Please verify your Employee ID, email, and password.";
+        errorMsgBox.classList.remove("hidden");
+      }
+    }
+
+    function handleLogout() {
+      document.getElementById("password").value = "";
+      const adminScreen = document.getElementById("admin-screen");
+      adminScreen.classList.add("hidden");
+      adminScreen.classList.remove("flex");
+      document.getElementById("login-screen").classList.remove("hidden");
+      switchAdminTab('overview');
+    }
+
+    // ---- Tab Navigation (scrolls to the relevant section; all sections stay visible) ----
+    function switchAdminTab(target) {
+      const buttons = document.querySelectorAll(".admin-nav-btn");
+      buttons.forEach(btn => {
+        btn.classList.remove("text-[#724867]", "bg-purple-50/50");
+        btn.classList.add("text-gray-600");
+      });
+      const activeBtn = document.getElementById(`admin-nav-${target}`);
+      if (activeBtn) {
+        activeBtn.classList.remove("text-gray-600");
+        activeBtn.classList.add("text-[#724867]", "bg-purple-50/50");
+      }
+      const targetMap = { overview: null, directory: "panel-directory", leave: "panel-leave", attendance: "panel-attendance" };
+      const el = targetMap[target] ? document.getElementById(targetMap[target]) : null;
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      else window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // ---- Employee Directory Search ----
+    function filterDirectory() {
+      const query = document.getElementById("directory-search").value.trim().toLowerCase();
+      const rows = document.querySelectorAll(".directory-row");
+      let visibleCount = 0;
+      rows.forEach(row => {
+        const match = row.dataset.name.includes(query);
+        row.classList.toggle("hidden", !match);
+        if (match) visibleCount++;
+      });
+      document.getElementById("directory-empty-state").classList.toggle("hidden", visibleCount !== 0);
+    }
+
+    // ---- Leave Request Approve / Reject ----
+    let pendingLeaveCount = 12;
+    let activeLeaveCards = 3;
+
+    function resolveLeaveRequest(buttonEl, action) {
+      const card = buttonEl.closest(".leave-card");
+      const name = card.dataset.name;
+
+      pendingLeaveCount = Math.max(0, pendingLeaveCount - 1);
+      activeLeaveCards = Math.max(0, activeLeaveCards - 1);
+
+      document.getElementById("leave-total-count").textContent = pendingLeaveCount;
+      document.getElementById("stat-leave-pending").textContent = pendingLeaveCount;
+
+      card.classList.add("fade-out");
+      setTimeout(() => {
+        card.remove();
+        if (activeLeaveCards === 0) {
+          document.getElementById("leave-empty-state").classList.remove("hidden");
+        }
+      }, 250);
+
+      if (action === "approve") {
+        alert(`Approved: ${name}'s leave request has been confirmed and the employee has been notified.`);
+      } else {
+        alert(`Rejected: ${name}'s leave request has been declined and the employee has been notified.`);
+      }
+    }
+  </script>
+</body>
+</html>
