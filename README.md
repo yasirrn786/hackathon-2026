@@ -1,94 +1,34 @@
-# hackathon-2026 # Dayflow 🌊
+# Dayflow 🌊 — Enterprise HR Management System
 
-**Dayflow is a simple HR management system designed to make everyday employee and HR tasks easier to manage in one place.**
+**Dayflow is a modern, full-stack HR management system designed to streamline employee operations, attendance monitoring, and administrative workflows in one place.**
 
-It provides separate interfaces for employees and HR administrators, allowing employees to manage their attendance and leave while HR can manage employees and keep track of overall workforce activity.
-
----
-
-## 📌 About the Project
-
-Managing employee information, attendance, and leave can become difficult when everything is handled separately.
-
-We built **Dayflow** to bring these basic HR activities together into a single platform.
-
-The project has two main sides:
-
-* **Employee Portal** – for employees to view their information, attendance, and leave details.
-* **HR/Admin Portal** – for HR teams to manage employees and monitor attendance and leave requests.
+Built with an **Employee Portal**, **HR Admin Hub**, and a **Node.js/Express/PostgreSQL** backend with JWT authentication and Role-Based Access Control (RBAC).
 
 ---
 
-## ✨ Features
+## ✨ Core Features
 
-### 👤 Employee Portal
+### 👤 Employee Portal (`employee_dashboard.html`)
+* **Live Shift Management**: Real-time shift clock-in and clock-out with automatic work hours and overtime calculations.
+* **Attendance History**: View past shift punch logs and compliance metrics.
+* **Leave Management**: Submit leave requests (Annual, Sick, Casual) with automatic day duration calculations.
+* **Leave Balance & Status**: Real-time tracking of remaining allowance and approval queue status.
+* **Profile & Compensation**: Dynamic job details, department info, and payslip history.
 
-Employees can:
-
-* View their dashboard
-* View personal and work information
-* Check attendance
-* View attendance history
-* Apply for leave
-* Track leave requests
-
-### 🧑‍💼 HR/Admin Portal
-
-HR administrators can:
-
-* View overall workforce statistics
-* View the employee directory
-* Search for employees
-* Check employee status
-* Monitor attendance
-* View and manage leave requests
-* View department and role information
-
----
-
-## 🖥️ Screenshots
-
-Add screenshots of the main pages here.
-
-For example:
-
-### Login Page
-
-<!-- Add screenshot here -->
-
-### Employee Dashboard
-
-<!-- Add screenshot here -->
-
-### HR Dashboard
-
-<!-- Add screenshot here -->
-
-### Employee Directory
-
-<!-- Add screenshot here -->
+### 🧑‍💼 HR / Admin Hub (`admin_panel.html`)
+* **Executive Overview**: Real-time workforce metrics (Total Headcount, Present Today, Pending Leaves).
+* **Employee Directory**: Searchable directory across name, email, department, job position, and system Login ID.
+* **Leave Approval Engine**: Review pending leave justifications with one-click **Approve** and **Reject** actions.
+* **Live Attendance Monitor**: Real-time monitor of today's employee arrivals (On-Time, Late, Absent, Completed).
+* **Employee Registration Modal**: Add new hires with automated company `login_id` (e.g. `OIJODO20260001`) and temporary password generation.
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Frontend
-
-* HTML
-* CSS
-* JavaScript
-* Tailwind CSS
-* Lucide Icons
-
-### Backend
-
-* Backend services are available in the `backend` directory.
-
-### Tools
-
-* Git
-* GitHub
-* VS Code
+* **Frontend**: HTML5, CSS3, JavaScript (ES6+), Tailwind CSS, Lucide Icons
+* **Backend**: Node.js, Express.js, JWT (`jsonwebtoken`), Password Hashing (`bcryptjs`), CORS, dotenv
+* **Database**: PostgreSQL (`pg` connection pool with automatic table schema creation)
 
 ---
 
@@ -96,99 +36,84 @@ For example:
 
 ```text
 dayflow/
-│
 ├── backend/
-│   └── Backend files
+│   ├── src/
+│   │   ├── controllers/
+│   │   │   ├── authController.js        # Signin (email/login_id), Signup, Profile /me
+│   │   │   ├── employeeController.js    # Directory listing, stats, register employee
+│   │   │   ├── attendanceController.js  # Live shift clock-in/out, today status, history
+│   │   │   └── leaveController.js       # Submit leave, get my leaves, approve/reject
+│   │   ├── middleware/
+│   │   │   └── auth.js                  # JWT verification & Role-Based Access Control
+│   │   ├── routes/
+│   │   │   ├── authRoutes.js
+│   │   │   ├── employeeRoutes.js
+│   │   │   ├── attendanceRoutes.js
+│   │   │   └── leaveRoutes.js
+│   │   ├── services/
+│   │   │   └── employeeService.js       # Automated Login ID & Temp Password generation
+│   │   ├── db.js                        # PostgreSQL connection pool
+│   │   ├── seed.js                      # Automated demo database seeder
+│   │   └── server.js                    # Express app & schema auto-initialization
+│   ├── .env.example
+│   ├── .env
+│   └── package.json
 │
-├── dayflow.html
-├── dayflow_app.html
-├── admin_panel.html
-├── login_page.html
-├── emploee_dashboard.html
-│
+├── login_page.html                      # Sign-in portal with role redirection
+├── employee_dashboard.html              # Full Employee portal (live API connected)
+├── admin_panel.html                     # Full HR Admin portal (live API connected)
 └── README.md
 ```
 
 ---
 
-## 🚀 How to Run
+## 🚀 Getting Started
 
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/yasirrn786/dayflow.git
-```
-
-### 2. Open the project
+### 1. Configure the Backend
 
 ```bash
-cd dayflow
+cd backend
+npm install
 ```
 
-### 3. Run the frontend
+Ensure PostgreSQL is running and configure `backend/.env` with your database connection URL:
 
-Open the required HTML file in your browser.
-
-For example:
-
-```text
-dayflow.html
+```env
+PORT=5000
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/dayflow_db
+JWT_SECRET=dayflow_super_secret_jwt_key_2026
 ```
 
-or
+### 2. Seed Demo Data
 
-```text
-dayflow_app.html
+Run the database seed script to populate sample accounts, team members, attendance, and leave records:
+
+```bash
+npm run seed
 ```
 
-If you are using the backend, check the files inside the `backend` folder for the required setup.
+### 3. Start the Server
+
+```bash
+npm start
+```
+The API server will start on `http://localhost:5000`.
+
+### 4. Launch the Web App
+
+Open `login_page.html` in your web browser (or use VS Code Live Server).
 
 ---
 
-## 🎯 Problem We Wanted to Solve
+## 🔑 Demo Credentials
 
-HR teams and employees often have to deal with different systems for things like attendance, leave, and employee information.
-
-This can make simple tasks unnecessarily complicated.
-
-With Dayflow, we wanted to create one place where employees can manage their basic HR activities and HR teams can manage and monitor employees more easily.
-
----
-
-## 💡 What We Learned
-
-While building Dayflow, we worked on:
-
-* Building a responsive web interface
-* Creating separate user experiences for employees and HR
-* Organizing employee and attendance data
-* Designing dashboards
-* Working with frontend and backend components
-* Building a project as a team under hackathon constraints
+| Role | Email / Login ID | Password | Access Portal |
+| :--- | :--- | :--- | :--- |
+| **HR Administrator** | `alex.morgan@dayflow.com` (or `ADM-2026-001`) | `admin123` | `admin_panel.html` |
+| **Employee** | `marcus.t@dayflow.com` (or `EMP-8842`) | `password123` | `employee_dashboard.html` |
 
 ---
 
-## 🔮 Future Improvements
+## 🏆 Hackathon 2026
 
-Some features we would like to add in the future:
-
-* AI-powered HR assistant
-* Real-time notifications
-* Payroll management
-* Better workforce analytics
-* Mobile application
-* Calendar integration
-* Improved authentication and security
-* Cloud deployment
-* Automated HR reports
-
----
-
-## 🏆 Hackathon Project
-
-Dayflow was created as part of **Hackathon 2026**.
-
-The goal was to build a practical HR management platform that makes common HR tasks simpler for both employees and administrators.
-
-
-
+Dayflow was developed for Hackathon 2026 to simplify daily HR operations and provide a seamless, interconnected experience for both employees and HR leaders.

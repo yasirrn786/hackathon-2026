@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dayflow - Employee Dashboard</title>
+  <!-- Tailwind CSS Core Setup -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts Inter System -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icon Framework -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col antialiased selection:bg-[#724867] selection:text-white">
+
+  <!-- Top System Navigation Header Bar -->
+  <header class="w-full bg-white border-b border-gray-100 px-6 py-3 flex items-center justify-between sticky top-0 z-40 shadow-xs">
+    <div class="flex items-center space-x-12">
+      <!-- Brand Identity Layout Anchor -->
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 bg-[#724867] rounded-lg flex items-center justify-center">
+          <i data-lucide="briefcase" class="text-white w-4 h-4"></i>
+        </div>
+        <span class="text-xl font-bold tracking-tight text-gray-900">Dayflow</span>
+        <span class="text-[10px] font-bold text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-md uppercase tracking-wider ml-1">Employee</span>
+      </div>
+      
+      <!-- Primary Core Navigation Triggers -->
+      <nav class="hidden md:flex items-center space-x-6">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="flex items-center space-x-1.5 text-sm font-semibold text-gray-900 bg-gray-50 px-3 py-1.5 rounded-lg tab-nav cursor-pointer">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 text-gray-500"></i>
+          <span>Dashboard</span>
+        </button>
+        <button onclick="switchTab('attendance')" id="nav-attendance" class="flex items-center space-x-1.5 text-sm font-medium text-gray-600 hover:text-[#724867] transition-colors tab-nav cursor-pointer">
+          <i data-lucide="calendar-check" class="w-4 h-4 text-gray-400"></i>
+          <span>Attendance Logs</span>
+        </button>
+        <button onclick="switchTab('leave')" id="nav-leave" class="flex items-center space-x-1.5 text-sm font-medium text-gray-600 hover:text-[#724867] transition-colors tab-nav cursor-pointer">
+          <i data-lucide="clipboard-list" class="w-4 h-4 text-gray-400"></i>
+          <span>Leave Requests</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Active Profile Controls -->
+    <div class="flex items-center space-x-4">
+      <button class="relative p-2 text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors" onclick="alert('Notification Center: You have no unread notifications.')">
+        <i data-lucide="bell" class="w-5 h-5"></i>
+      </button>
+      <div class="flex items-center space-x-3 pl-3 border-l border-gray-100">
+        <div class="text-right hidden sm:block">
+          <h4 id="user-display-name" class="text-xs font-bold text-gray-900">Loading...</h4>
+          <p id="user-display-role" class="text-[10px] text-gray-500 font-medium uppercase tracking-wider">Employee</p>
+        </div>
+        <div class="w-9 h-9 rounded-full bg-gray-200 border border-gray-100 overflow-hidden">
+          <img id="user-display-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Profile" class="w-full h-full object-cover">
+        </div>
+        <button onclick="handleLogout()" class="p-2 text-gray-400 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-full transition-colors" title="Log Out">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Workspace Shell Frame Layout Container -->
+  <div class="flex-1 w-full max-w-[1400px] mx-auto p-6 flex flex-col lg:flex-row gap-6">
+    
+    <!-- Left Navigation Profile Dashboard Panel -->
+    <aside class="w-full lg:w-64 shrink-0 flex flex-col gap-6">
+      <!-- Fixed Identity Visual Segment -->
+      <div class="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col items-center text-center shadow-xs">
+        <div class="relative w-20 h-20 rounded-full border-4 border border-[#724867]/10 p-0.5 mb-3">
+          <img id="sidebar-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Profile Photo" class="w-full h-full object-cover rounded-full">
+          <span id="sidebar-status-dot" class="absolute bottom-0 right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></span>
+        </div>
+        <h3 id="sidebar-name" class="font-bold text-gray-900 text-base">Loading...</h3>
+        <p id="sidebar-role" class="text-xs text-gray-500 font-medium mt-0.5">Staff Member</p>
+        <span id="sidebar-id" class="inline-block bg-purple-50 border border-[#724867]/20 text-[10px] font-bold text-[#724867] px-2 py-0.5 rounded mt-2 uppercase tracking-wide">ID: ---</span>
+      </div>
+
+      <!-- Functional Navigation Tab Anchors -->
+      <nav class="bg-white rounded-2xl border border-gray-100 p-2 flex flex-col gap-1 shadow-xs">
+        <button onclick="switchTab('dashboard')" id="side-dashboard" class="flex items-center justify-between px-4 py-3 bg-[#724867] text-white rounded-xl text-sm font-semibold shadow-xs text-left w-full sidebar-btn cursor-pointer">
+          <div class="flex items-center space-x-3">
+            <i data-lucide="user" class="w-4 h-4"></i>
+            <span>Profile Dashboard</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 opacity-80"></i>
+        </button>
+        <button onclick="switchTab('attendance')" id="side-attendance" class="flex items-center justify-between px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-[#724867] rounded-xl text-sm font-medium transition-colors text-left w-full sidebar-btn cursor-pointer">
+          <div class="flex items-center space-x-3">
+            <i data-lucide="calendar-check" class="w-4 h-4 text-gray-400"></i>
+            <span>Attendance Status</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 opacity-0 transition-opacity"></i>
+        </button>
+        <button onclick="switchTab('leave')" id="side-leave" class="flex items-center justify-between px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-[#724867] rounded-xl text-sm font-medium transition-colors text-left w-full sidebar-btn cursor-pointer">
+          <div class="flex items-center space-x-3">
+            <i data-lucide="clipboard-list" class="w-4 h-4 text-gray-400"></i>
+            <span>Leave Management</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 opacity-0 transition-opacity"></i>
+        </button>
+        <div class="h-px bg-gray-100 my-2"></div>
+        <button onclick="handleLogout()" class="flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl text-sm font-semibold transition-colors text-left w-full cursor-pointer">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+          <span>Logout System</span>
+        </button>
+      </nav>
+
+      <!-- HR Support Context Widget Node -->
+      <div class="bg-gray-100 rounded-2xl p-5 mt-auto text-center border border-gray-200/50 flex flex-col items-center">
+        <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-500 mb-2.5 shadow-2xs">
+          <i data-lucide="help-circle" class="w-4 h-4"></i>
+        </div>
+        <p class="text-[11px] font-medium text-gray-500 uppercase tracking-wide">Need help?</p>
+        <h4 class="text-xs font-bold text-gray-800 mt-0.5">Contact HR Support</h4>
+        <button onclick="alert('Support channel opened. Support email: hr@dayflow.com')" class="mt-3 w-full bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold py-2 px-4 rounded-xl border border-gray-200 shadow-2xs transition-colors cursor-pointer">
+          Support Center
+        </button>
+      </div>
+    </aside>
+
+    <!-- Content Sections Wrapper Panel -->
+    <div class="flex-1">
+      
+      <!-- TAB 1: MAIN PROFILE DASHBOARD PANEL -->
+      <main id="tab-dashboard" class="flex flex-col gap-6 tab-content">
+        <!-- Broadcast/Announcement Banner Component Layout -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xs relative overflow-hidden">
+          <div class="flex-1 space-y-1">
+            <div class="flex items-center space-x-2 text-xs font-bold text-blue-700 uppercase tracking-wider">
+              <i data-lucide="megaphone" class="w-3.5 h-3.5"></i>
+              <span>New HR Update</span>
+            </div>
+            <h2 class="text-xl font-bold text-gray-900 tracking-tight">Annual Performance Review Cycle 2026</h2>
+            <p class="text-sm text-gray-600 max-w-2xl leading-relaxed">The review cycle is now open. Please ensure all leaves and profile information are up to date. You can sync with your manager directly for appraisals.</p>
+          </div>
+          <div class="hidden md:flex items-center justify-center w-24 h-24 bg-blue-600/10 rounded-2xl border border-blue-200/40 relative">
+            <i data-lucide="sparkles" class="w-10 h-10 text-blue-600"></i>
+          </div>
+        </div>
+
+        <!-- Module Summary Title Controls -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-2">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Dashboard Overview</h2>
+            <p class="text-xs text-gray-500 font-medium">Welcome back, <span id="welcome-first-name">Employee</span>. Here's what's happening today.</p>
+          </div>
+          <div class="flex items-center space-x-1.5 text-xs font-bold text-gray-500 bg-white border border-gray-200/80 px-3 py-1.5 rounded-xl shadow-2xs">
+            <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+            <span id="current-date-display">Today</span>
+          </div>
+        </div>
+
+        <!-- Quick Metrics Analytics Grid Component -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Attendance Monitoring Card Node -->
+          <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-xs relative flex flex-col justify-between min-h-[130px]">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Today's Attendance</span>
+                <span id="dashboard-attendance-pill" class="bg-gray-100 text-gray-600 border border-gray-200 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">Checking...</span>
+              </div>
+              <h3 id="dashboard-attendance-status" class="text-xl font-bold text-gray-900 mt-3">--</h3>
+            </div>
+            <p id="dashboard-attendance-time" class="text-xs font-medium text-gray-400 flex items-center mt-2">
+              <i data-lucide="clock" class="w-3.5 h-3.5 mr-1 text-gray-400"></i> Loading state...
+            </p>
+          </div>
+
+          <!-- Leave Balance Monitoring Card Node -->
+          <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-xs relative flex flex-col justify-between min-h-[130px]">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Leave Balance</span>
+                <span id="dashboard-leave-badge" class="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">0 Pending</span>
+              </div>
+              <h3 id="dashboard-leave-balance" class="text-xl font-bold text-gray-900 mt-3">24.0 Days</h3>
+            </div>
+            <p class="text-xs font-medium text-gray-400 flex items-center mt-2">
+              <i data-lucide="calendar-days" class="w-3.5 h-3.5 mr-1 text-gray-400"></i> Annual allowance
+            </p>
+          </div>
+
+          <!-- Compensation Projection Monitoring Card Node -->
+          <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-xs relative flex flex-col justify-between min-h-[130px]">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Department</span>
+                <i data-lucide="building" class="w-4 h-4 text-gray-300"></i>
+              </div>
+              <h3 id="dashboard-dept-display" class="text-xl font-bold text-gray-900 mt-3">General</h3>
+            </div>
+            <p id="dashboard-location-display" class="text-xs font-medium text-gray-400 flex items-center mt-2">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 text-gray-400"></i> Headquarters
+            </p>
+          </div>
+        </div>
+
+        <!-- Section Segment Layout Block: Recent Payslip Matrix View -->
+        <section class="bg-white rounded-2xl border border-gray-100 shadow-xs p-6">
+          <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="wallet" class="text-gray-400 w-5 h-5"></i>
+              <h3 class="font-bold text-gray-900 text-base">Recent Payslips</h3>
+            </div>
+            <a href="#" onclick="alert('Payslip repository: Showing most recent payroll statements.')" class="text-xs font-bold text-[#724867] hover:underline flex items-center space-x-0.5">
+              <span>View Full History</span>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+
+          <!-- Structured Data Table Frame Component -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-gray-100">
+                  <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Reference ID</th>
+                  <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Payment Period</th>
+                  <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Release Date</th>
+                  <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Net Amount</th>
+                  <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Status</th>
+                  <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-50 text-sm font-medium text-gray-800">
+                <tr class="hover:bg-gray-50/50 transition-colors">
+                  <td class="py-3.5 font-mono text-xs text-gray-500">SL-2026-08</td>
+                  <td class="py-3.5">August 2026</td>
+                  <td class="py-3.5 text-gray-500 font-normal">Aug 31, 2026</td>
+                  <td class="py-3.5 font-semibold text-gray-900">$5,100.00</td>
+                  <td class="py-3.5"><span class="inline-flex items-center text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-md font-medium border border-green-200/50"><span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>Processed</span></td>
+                  <td class="py-3.5 text-right"><button onclick="alert('Exporting payslip PDF SL-2026-08...')" class="p-1.5 text-gray-400 hover:text-[#724867] bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"><i data-lucide="download" class="w-4 h-4"></i></button></td>
+                </tr>
+                <tr class="hover:bg-gray-50/50 transition-colors">
+                  <td class="py-3.5 font-mono text-xs text-gray-500">SL-2026-07</td>
+                  <td class="py-3.5">July 2026</td>
+                  <td class="py-3.5 text-gray-500 font-normal">Jul 31, 2026</td>
+                  <td class="py-3.5 font-semibold text-gray-900">$5,100.00</td>
+                  <td class="py-3.5"><span class="inline-flex items-center text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-md font-medium border border-green-200/50"><span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>Paid</span></td>
+                  <td class="py-3.5 text-right"><button onclick="alert('Exporting payslip PDF SL-2026-07...')" class="p-1.5 text-gray-400 hover:text-[#724867] bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"><i data-lucide="download" class="w-4 h-4"></i></button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Multi-Column Split Bottom Layout -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-white border border-gray-100 shadow-xs rounded-2xl p-6">
+            <div class="border-b border-gray-100 pb-3 mb-4">
+              <h3 class="font-bold text-gray-900 text-base">Upcoming Office Holidays</h3>
+              <p class="text-xs text-gray-400 font-medium mt-0.5">Corporate calendar dates.</p>
+            </div>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+                <div>
+                  <h4 class="text-sm font-semibold text-gray-800">Autumn Holiday</h4>
+                  <p class="text-xs font-medium text-gray-400 mt-0.5">Nov 12 - Nov 14</p>
+                </div>
+                <span class="text-[10px] font-bold text-gray-500 bg-gray-200 px-2 py-0.5 rounded-md uppercase tracking-wider">Public</span>
+              </div>
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+                <div>
+                  <h4 class="text-sm font-semibold text-gray-800">Dayflow Anniversary</h4>
+                  <p class="text-xs font-medium text-gray-400 mt-0.5">Dec 05</p>
+                </div>
+                <span class="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md uppercase tracking-wider">Event</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white border border-gray-100 shadow-xs rounded-2xl p-6">
+            <div class="border-b border-gray-100 pb-3 mb-4">
+              <h3 class="font-bold text-gray-900 text-base">Quick Actions</h3>
+              <p class="text-xs text-gray-400 font-medium mt-0.5">Commonly used operations.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <button onclick="switchTab('leave')" class="flex flex-col text-left p-4 bg-gray-50 hover:bg-gray-100/70 border border-gray-200/60 hover:border-[#724867]/20 rounded-xl group transition-all text-sm cursor-pointer">
+                <div class="w-8 h-8 rounded-lg bg-white shadow-2xs flex items-center justify-center text-gray-500 group-hover:text-[#724867] transition-colors mb-3">
+                  <i data-lucide="plane"></i>
+                </div>
+                <h4 class="font-bold text-gray-900 group-hover:text-[#724867] transition-colors">Request Leave</h4>
+                <p class="text-xs text-gray-400 font-medium mt-0.5 leading-snug">vacation, sick, personal</p>
+              </button>
+              <button onclick="switchTab('attendance')" class="flex flex-col text-left p-4 bg-gray-50 hover:bg-gray-100/70 border border-gray-200/60 hover:border-[#724867]/20 rounded-xl group transition-all text-sm cursor-pointer">
+                <div class="w-8 h-8 rounded-lg bg-white shadow-2xs flex items-center justify-center text-gray-500 group-hover:text-[#724867] transition-colors mb-3">
+                  <i data-lucide="calendar-check"></i>
+                </div>
+                <h4 class="font-bold text-gray-900 group-hover:text-[#724867] transition-colors">Shift Attendance</h4>
+                <p class="text-xs text-gray-400 font-medium mt-0.5 leading-snug">clock in, clock out, logs</p>
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- TAB 2: FUNCTIONAL ATTENDANCE TRACKER PANEL -->
+      <main id="tab-attendance" class="hidden flex flex-col gap-6 tab-content">
+        <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-xs">
+          <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
+            <div>
+              <h2 class="text-xl font-bold text-gray-900">Attendance Monitoring</h2>
+              <p class="text-xs text-gray-500">Live check-in and shift management connected to Dayflow API</p>
+            </div>
+            <button id="clock-toggle-btn" onclick="handleClockAction()" class="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2.5 px-5 rounded-xl shadow-md transition-all cursor-pointer">
+              <i data-lucide="log-in" class="w-4 h-4"></i>
+              <span id="clock-btn-text">Clock Into Shift</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 text-center">
+              <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">First Punch</span>
+              <span id="punch-in-time" class="text-base font-bold text-gray-800 block mt-1">--:--:--</span>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 text-center">
+              <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Last Punch</span>
+              <span id="punch-out-time" class="text-base font-bold text-gray-800 block mt-1">--:--:--</span>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 text-center">
+              <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Total Hours</span>
+              <span id="total-shift-hours" class="text-base font-bold text-gray-800 block mt-1">0.00 hrs</span>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 text-center">
+              <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Status Code</span>
+              <span id="attendance-status-badge" class="inline-block bg-gray-200 text-gray-700 font-bold text-xs px-2.5 py-0.5 rounded-md mt-1">NOT CHECKED IN</span>
+            </div>
+          </div>
+
+          <h3 class="font-bold text-gray-900 text-sm mb-3">Historical Shift Logs</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm font-medium text-gray-700">
+              <thead>
+                <tr class="bg-gray-50 border-b border-gray-100 text-gray-400 text-xs font-bold uppercase tracking-wider">
+                  <th class="p-3">Date</th>
+                  <th class="p-3">Clock In</th>
+                  <th class="p-3">Clock Out</th>
+                  <th class="p-3">Work Hours</th>
+                  <th class="p-3">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-50" id="attendance-logs-table">
+                <tr><td colspan="5" class="p-4 text-center text-gray-400 text-xs">Loading attendance history...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+
+      <!-- TAB 3: FUNCTIONAL LEAVE MANAGEMENT FORM PANEL -->
+      <main id="tab-leave" class="hidden flex flex-col gap-6 tab-content">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Request Form Component node -->
+          <div class="lg:col-span-1 bg-white p-6 rounded-2xl border border-gray-100 shadow-xs h-fit">
+            <h3 class="font-bold text-gray-900 text-base mb-1">Apply for Leave</h3>
+            <p class="text-xs text-gray-400 mb-4">Submit structured request to HR administrators</p>
+            
+            <form onsubmit="handleLeaveSubmit(event);" class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Leave Category</label>
+                <select id="leave-type" class="w-full border border-gray-200 rounded-lg p-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#724867]">
+                  <option value="Annual Leave">Annual Paid Leave</option>
+                  <option value="Casual Leave">Casual Personal Leave</option>
+                  <option value="Sick Leave">Medical / Sick Leave</option>
+                </select>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Start Date</label>
+                  <input type="date" id="leave-start" required class="w-full border border-gray-200 rounded-lg p-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#724867]">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-500 uppercase mb-1">End Date</label>
+                  <input type="date" id="leave-end" required class="w-full border border-gray-200 rounded-lg p-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#724867]">
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Reason / Justification</label>
+                <textarea id="leave-reason" placeholder="State your reason clearly..." required rows="3" class="w-full border border-gray-200 rounded-lg p-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#724867]"></textarea>
+              </div>
+              <button type="submit" id="leave-submit-btn" class="w-full bg-[#724867] hover:bg-[#5c3a53] text-white text-sm font-bold py-2.5 rounded-lg shadow-sm transition-colors cursor-pointer">
+                Submit Leave Request
+              </button>
+            </form>
+          </div>
+
+          <!-- Leave Log Status Table Module -->
+          <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-xs">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+              <div>
+                <h3 class="font-bold text-gray-900 text-base">Your Leave Records</h3>
+                <p class="text-xs text-gray-400">Live evaluation queue of your filed leave requests</p>
+              </div>
+              <span id="leave-balance-badge-top" class="text-xs font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200">
+                Allowance: 24 Days
+              </span>
+            </div>
+            
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm font-medium text-gray-700">
+                <thead>
+                  <tr class="bg-gray-50 border-b border-gray-100 text-gray-400 text-xs font-bold uppercase tracking-wider">
+                    <th class="p-3">Category</th>
+                    <th class="p-3">Dates</th>
+                    <th class="p-3">Duration</th>
+                    <th class="p-3">Reason</th>
+                    <th class="p-3">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50" id="leave-records-tbody">
+                  <tr><td colspan="5" class="p-4 text-center text-gray-400 text-xs">Loading leave records...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- Operational Footer -->
+  <footer class="w-full bg-white border-t border-gray-100 px-6 py-4 mt-12 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-semibold text-gray-500 tracking-wide">
+    <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+      <div class="flex items-center space-x-1.5 text-green-600 bg-green-50 px-2 py-1 rounded-md border border-green-200/30">
+        <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+        <span class="text-[10px] uppercase font-bold tracking-wider">System Status: Connected Operational</span>
+      </div>
+    </div>
+    
+    <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-bold text-gray-600 uppercase text-[10px] tracking-wider">
+      <a href="#" class="hover:text-[#724867] transition-colors">Privacy Policy</a>
+      <a href="#" class="hover:text-[#724867] transition-colors">Security</a>
+      <span class="text-gray-300 font-normal normal-case text-xs hidden sm:inline">&copy; 2026 Dayflow Enterprise</span>
+    </div>
+  </footer>
+
+  <!-- DYNAMIC LIVE JAVASCRIPT ENGINE -->
+  <script>
+    const API_BASE_URL = 'http://localhost:5000';
+    let currentUser = null;
+    let todayAttendance = null;
+
+    // Helper: Get authenticated token
+    function getToken() {
+      return localStorage.getItem('dayflow_token');
+    }
+
+    // Helper: Authenticated fetch wrapper
+    async function apiFetch(endpoint, options = {}) {
+      const token = getToken();
+      if (!token) {
+        window.location.href = 'login_page.html';
+        return null;
+      }
+
+      options.headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        ...(options.headers || {})
+      };
+
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, options);
+      if (res.status === 401 || res.status === 403) {
+        localStorage.clear();
+        window.location.href = 'login_page.html';
+        return null;
+      }
+      return res.json();
+    }
+
+    // Initial Load & Auth Guard
+    document.addEventListener("DOMContentLoaded", async () => {
+      lucide.createIcons();
+      document.getElementById('current-date-display').textContent = new Date().toLocaleDateString(undefined, {
+        weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+      });
+
+      // Default today dates for leave picker
+      const todayIso = new Date().toISOString().split('T')[0];
+      document.getElementById('leave-start').value = todayIso;
+      document.getElementById('leave-end').value = todayIso;
+
+      await loadUserProfile();
+      await loadTodayAttendance();
+      await loadAttendanceHistory();
+      await loadLeaveRecords();
+    });
+
+    // 1. User Profile Loader
+    async function loadUserProfile() {
+      const data = await apiFetch('/api/auth/me');
+      if (!data || !data.success) return;
+
+      currentUser = data.user;
+      document.getElementById("user-display-name").textContent = currentUser.fullName;
+      document.getElementById("user-display-role").textContent = currentUser.jobPosition;
+      document.getElementById("user-display-avatar").src = currentUser.avatarUrl;
+
+      document.getElementById("sidebar-name").textContent = currentUser.fullName;
+      document.getElementById("sidebar-role").textContent = currentUser.jobPosition;
+      document.getElementById("sidebar-id").textContent = `ID: ${currentUser.loginId}`;
+      document.getElementById("sidebar-avatar").src = currentUser.avatarUrl;
+
+      document.getElementById("welcome-first-name").textContent = currentUser.firstName;
+      document.getElementById("dashboard-dept-display").textContent = currentUser.department;
+      document.getElementById("dashboard-location-display").innerHTML = `<i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 text-gray-400"></i> ${currentUser.location}`;
+
+      lucide.createIcons();
+    }
+
+    // 2. Today's Attendance Loader
+    async function loadTodayAttendance() {
+      const data = await apiFetch('/api/attendance/today');
+      if (!data || !data.success) return;
+
+      todayAttendance = data.attendance;
+      const btn = document.getElementById("clock-toggle-btn");
+      const btnText = document.getElementById("clock-btn-text");
+      const statusBadge = document.getElementById("attendance-status-badge");
+      const dashPill = document.getElementById("dashboard-attendance-pill");
+      const dashStatus = document.getElementById("dashboard-attendance-status");
+      const dashTime = document.getElementById("dashboard-attendance-time");
+
+      if (todayAttendance.isClockedIn) {
+        const inTimeStr = new Date(todayAttendance.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        document.getElementById("punch-in-time").textContent = inTimeStr;
+        document.getElementById("punch-out-time").textContent = "--:--:--";
+        document.getElementById("total-shift-hours").textContent = "In Progress";
+
+        statusBadge.className = "inline-block bg-green-100 text-green-800 font-bold text-xs px-2.5 py-0.5 rounded-md mt-1";
+        statusBadge.textContent = "PRESENT (ON SHIFT)";
+
+        btn.className = "flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2.5 px-5 rounded-xl shadow-md transition-all cursor-pointer";
+        btnText.textContent = "Clock Out of Shift";
+
+        dashPill.className = "bg-green-50 text-green-700 border border-green-200 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider";
+        dashPill.textContent = "On Duty";
+        dashStatus.textContent = "Clocked In";
+        dashTime.innerHTML = `<i data-lucide="clock" class="w-3.5 h-3.5 mr-1 text-gray-400"></i> Since ${inTimeStr}`;
+
+      } else if (todayAttendance.checkOutTime) {
+        const inTimeStr = new Date(todayAttendance.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const outTimeStr = new Date(todayAttendance.checkOutTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        document.getElementById("punch-in-time").textContent = inTimeStr;
+        document.getElementById("punch-out-time").textContent = outTimeStr;
+        document.getElementById("total-shift-hours").textContent = `${todayAttendance.workHours} hrs`;
+
+        statusBadge.className = "inline-block bg-blue-100 text-blue-800 font-bold text-xs px-2.5 py-0.5 rounded-md mt-1";
+        statusBadge.textContent = "SHIFT COMPLETED";
+
+        btn.className = "flex items-center space-x-2 bg-gray-400 text-white text-sm font-bold py-2.5 px-5 rounded-xl cursor-not-allowed";
+        btn.disabled = true;
+        btnText.textContent = "Shift Done for Today";
+
+        dashPill.className = "bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider";
+        dashPill.textContent = "Completed";
+        dashStatus.textContent = "Clocked Out";
+        dashTime.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5 mr-1 text-gray-400"></i> ${todayAttendance.workHours} hours logged`;
+
+      } else {
+        document.getElementById("punch-in-time").textContent = "--:--:--";
+        document.getElementById("punch-out-time").textContent = "--:--:--";
+        document.getElementById("total-shift-hours").textContent = "0.00 hrs";
+
+        statusBadge.className = "inline-block bg-gray-200 text-gray-700 font-bold text-xs px-2.5 py-0.5 rounded-md mt-1";
+        statusBadge.textContent = "NOT CHECKED IN";
+
+        btn.className = "flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2.5 px-5 rounded-xl shadow-md transition-all cursor-pointer";
+        btn.disabled = false;
+        btnText.textContent = "Clock Into Shift";
+
+        dashPill.className = "bg-gray-100 text-gray-500 border border-gray-200 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider";
+        dashPill.textContent = "Inactive";
+        dashStatus.textContent = "Not Clocked In";
+        dashTime.innerHTML = `<i data-lucide="clock-off" class="w-3.5 h-3.5 mr-1 text-gray-400"></i> Ready to start shift`;
+      }
+      lucide.createIcons();
+    }
+
+    // 3. Attendance Action Handler (Clock In / Clock Out API)
+    async function handleClockAction() {
+      if (!todayAttendance || !todayAttendance.isClockedIn) {
+        // Perform Check-In
+        const res = await apiFetch('/api/attendance/check-in', { method: 'POST', body: JSON.stringify({}) });
+        if (res && res.success) {
+          alert('Successfully clocked into shift!');
+          await loadTodayAttendance();
+          await loadAttendanceHistory();
+        } else if (res) {
+          alert(res.error || 'Failed to clock in');
+        }
+      } else {
+        // Perform Check-Out
+        if (confirm('Are you sure you want to clock out and end your shift for today?')) {
+          const res = await apiFetch('/api/attendance/check-out', { method: 'POST', body: JSON.stringify({}) });
+          if (res && res.success) {
+            alert(`Shift concluded. Total logged hours: ${res.attendance.workHours} hrs`);
+            await loadTodayAttendance();
+            await loadAttendanceHistory();
+          } else if (res) {
+            alert(res.error || 'Failed to clock out');
+          }
+        }
+      }
+    }
+
+    // 4. Attendance History Loader
+    async function loadAttendanceHistory() {
+      const data = await apiFetch('/api/attendance/history');
+      const tableBody = document.getElementById("attendance-logs-table");
+      if (!data || !data.success || data.history.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400 text-xs">No past attendance logs found.</td></tr>`;
+        return;
+      }
+
+      tableBody.innerHTML = data.history.map(row => {
+        const inFormatted = row.check_in_time ? new Date(row.check_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--';
+        const outFormatted = row.check_out_time ? new Date(row.check_out_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--';
+        const dateFormatted = new Date(row.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        
+        let statusBadge = `<span class="bg-green-50 text-green-700 border border-green-200 text-[10px] font-bold px-2 py-0.5 rounded-md">PRESENT</span>`;
+        if (!row.check_out_time) {
+          statusBadge = `<span class="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-md">ON DUTY</span>`;
+        }
+
+        return `
+          <tr class="hover:bg-gray-50/50 transition-colors font-medium">
+            <td class="p-3 font-semibold text-gray-900">${dateFormatted}</td>
+            <td class="p-3 text-gray-600 font-mono text-xs">${inFormatted}</td>
+            <td class="p-3 text-gray-600 font-mono text-xs">${outFormatted}</td>
+            <td class="p-3 font-semibold text-gray-800">${row.work_hours || '0.00'} hrs</td>
+            <td class="p-3">${statusBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // 5. Leave Records & Balance Loader
+    async function loadLeaveRecords() {
+      const data = await apiFetch('/api/leaves/my');
+      if (!data || !data.success) return;
+
+      document.getElementById("dashboard-leave-balance").textContent = `${data.summary.remainingBalance.toFixed(1)} Days`;
+      document.getElementById("dashboard-leave-badge").textContent = `${data.summary.pendingCount} Pending`;
+      document.getElementById("leave-balance-badge-top").textContent = `Remaining Balance: ${data.summary.remainingBalance.toFixed(1)} Days`;
+
+      const tbody = document.getElementById("leave-records-tbody");
+      if (data.leaves.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400 text-xs">No leave requests filed yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.leaves.map(l => {
+        let statusBadge = `<span class="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">PENDING</span>`;
+        if (l.status === 'APPROVED') {
+          statusBadge = `<span class="bg-green-50 text-green-700 border border-green-200 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">APPROVED</span>`;
+        } else if (l.status === 'REJECTED') {
+          statusBadge = `<span class="bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">REJECTED</span>`;
+        }
+
+        const startFormatted = new Date(l.start_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        const endFormatted = new Date(l.end_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+
+        return `
+          <tr class="hover:bg-gray-50/50 transition-colors">
+            <td class="p-3 font-semibold text-gray-900">${l.leave_type}</td>
+            <td class="p-3 text-gray-600">${startFormatted} - ${endFormatted}</td>
+            <td class="p-3 font-semibold text-gray-800">${l.days_count} Day(s)</td>
+            <td class="p-3 text-gray-500 text-xs max-w-xs truncate">${l.reason}</td>
+            <td class="p-3">${statusBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // 6. Leave Application Submit Handler
+    async function handleLeaveSubmit(event) {
+      event.preventDefault();
+      const leaveType = document.getElementById("leave-type").value;
+      const startDate = document.getElementById("leave-start").value;
+      const endDate = document.getElementById("leave-end").value;
+      const reason = document.getElementById("leave-reason").value.trim();
+      const submitBtn = document.getElementById("leave-submit-btn");
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+
+      const res = await apiFetch('/api/leaves', {
+        method: 'POST',
+        body: JSON.stringify({ leaveType, startDate, endDate, reason })
+      });
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Leave Request';
+
+      if (res && res.success) {
+        alert('Leave request submitted successfully for HR approval!');
+        document.getElementById("leave-reason").value = '';
+        await loadLeaveRecords();
+      } else if (res) {
+        alert(res.error || 'Failed to submit leave request.');
+      }
+    }
+
+    // Tab Navigation Logic
+    function switchTab(targetTabId) {
+      document.querySelectorAll(".tab-content").forEach(tab => tab.classList.add("hidden"));
+      document.getElementById(`tab-${targetTabId}`).classList.remove("hidden");
+      
+      document.querySelectorAll(".tab-nav").forEach(nav => {
+        nav.classList.remove("font-semibold", "text-gray-900", "bg-gray-50");
+        nav.classList.add("font-medium", "text-gray-600");
+      });
+      document.querySelectorAll(".sidebar-btn").forEach(btn => {
+        btn.classList.remove("bg-[#724867]", "text-white", "font-semibold", "shadow-xs");
+        btn.classList.add("text-gray-600", "hover:bg-gray-50", "hover:text-[#724867]", "font-medium");
+        btn.querySelector("i[data-lucide='chevron-right']").classList.add("opacity-0");
+      });
+
+      const activeNav = document.getElementById(`nav-${targetTabId}`);
+      if (activeNav) {
+        activeNav.classList.remove("font-medium", "text-gray-600");
+        activeNav.classList.add("font-semibold", "text-gray-900", "bg-gray-50");
+      }
+      
+      const activeSide = document.getElementById(`side-${targetTabId}`);
+      if (activeSide) {
+        activeSide.classList.remove("text-gray-600", "hover:bg-gray-50", "hover:text-[#724867]", "font-medium");
+        activeSide.classList.add("bg-[#724867]", "text-white", "font-semibold", "shadow-xs");
+        activeSide.querySelector("i[data-lucide='chevron-right']").classList.remove("opacity-0");
+      }
+    }
+
+    // Logout Handler
+    function handleLogout() {
+      if (confirm("Are you sure you want to log out of Dayflow?")) {
+        localStorage.clear();
+        window.location.href = 'login_page.html';
+      }
+    }
+  </script>
+</body>
+</html>
