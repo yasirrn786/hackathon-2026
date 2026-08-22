@@ -3,11 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dayflow App</title>
+  <title>Dayflow HRMS</title>
+  <!-- Stable Tailwind CSS Core CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts Inter System -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icon Framework -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     body { font-family: 'Inter', sans-serif; }
@@ -20,10 +23,11 @@
     }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-900 min-h-screen antialiased selection:bg-[#724867] selection:text-white">
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col antialiased selection:bg-[#724867] selection:text-white">
 
-  <!-- 1. LOGIN SCREEN -->
+  <!-- ==================== SCREEN 1: LOGIN GATEWAY ==================== -->
   <div id="login-screen" class="bg-workspace min-h-screen flex flex-col justify-between items-center p-4">
+    <!-- Header -->
     <header class="flex flex-col items-center text-center mt-6 mb-4">
       <div class="w-12 h-12 bg-[#724867] rounded-xl flex items-center justify-center shadow-md mb-3">
         <i data-lucide="briefcase" class="text-white w-6 h-6"></i>
@@ -32,75 +36,82 @@
       <p class="text-sm font-medium text-gray-600 mt-1 uppercase tracking-wider">Enterprise HR Management System</p>
     </header>
 
+    <!-- Login Card -->
     <main class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-100 p-8 my-auto">
       <div class="text-center mb-6">
         <h2 class="text-2xl font-bold text-gray-900">Sign In</h2>
         <p class="text-sm text-gray-500 mt-1">Enter your professional credentials to access your dashboard</p>
       </div>
 
-      <div id="login-error-banner" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 hidden flex items-start space-x-3">
+      <!-- Error Alert Banner (Hidden by default) -->
+      <div id="login-error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-start space-x-3 hidden">
         <i data-lucide="alert-circle" class="text-red-600 w-5 h-5 shrink-0 mt-0.5"></i>
         <div>
           <h4 class="text-sm font-semibold text-red-800">Authentication Failed</h4>
-          <p class="text-xs text-red-700 mt-0.5 leading-relaxed">Incorrect credentials. Please verify your fields and password.</p>
+          <p class="text-xs text-red-700 mt-0.5 leading-relaxed">Incorrect credentials. Please verify your entries.</p>
         </div>
       </div>
 
-      <form class="space-y-4" id="login-form">
+      <form class="space-y-4" onsubmit="handleLogin(event)">
+        <!-- Employee ID -->
         <div>
-          <label class="flex items-center text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+          <label for="employee-id" class="flex items-center text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
             <i data-lucide="user-check" class="w-3.5 h-3.5 mr-1.5 text-gray-500"></i> Employee ID
           </label>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 pointer-events-none">
               <i data-lucide="user" class="w-4 h-4"></i>
             </span>
-            <input type="text" id="login-id" placeholder="e.g. EMP-8842" required
+            <input type="text" id="employee-id" value="EMP-8842" placeholder="e.g. EMP-10293" 
               class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50/50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#724867] focus:border-[#724867] focus:bg-white transition-colors">
           </div>
         </div>
 
+        <!-- Email Address -->
         <div>
-          <label class="flex items-center text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+          <label for="email" class="flex items-center text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
             <i data-lucide="mail" class="w-3.5 h-3.5 mr-1.5 text-gray-500"></i> Email Address
           </label>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 pointer-events-none">
               <i data-lucide="at-sign" class="w-4 h-4"></i>
             </span>
-            <input type="email" id="login-email" placeholder="marcus.t@dayflow.com" required
+            <input type="email" id="email" value="marcus.t@dayflow.com" placeholder="alex.morgan@dayflow.com" 
               class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50/50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#724867] focus:border-[#724867] focus:bg-white transition-colors">
           </div>
         </div>
 
+        <!-- Password -->
         <div>
           <div class="flex justify-between items-center mb-1.5">
-            <label class="flex items-center text-xs font-semibold text-gray-700 uppercase tracking-wide">
+            <label for="password" class="flex items-center text-xs font-semibold text-gray-700 uppercase tracking-wide">
               <i data-lucide="lock" class="w-3.5 h-3.5 mr-1.5 text-gray-500"></i> Password
-            </label>
-            <a href="#" onclick="alert('Demo Mode: Contact your administrator to reset your password.')" class="text-xs font-medium text-[#724867] hover:underline">Forgot password?</a>
+          </label>
+            <a href="#" class="text-xs font-medium text-[#724867] hover:underline" onclick="alert('Demo Feature: Password recovery loop is handled by your system server context.')">Forgot password?</a>
           </div>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 pointer-events-none">
               <i data-lucide="key-round" class="w-4 h-4"></i>
             </span>
-            <input type="password" id="login-password" placeholder="••••••••" required
+            <input type="password" id="password" value="password123" placeholder="••••••••" 
               class="block w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50/50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#724867] focus:border-[#724867] focus:bg-white transition-colors">
-            <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
-              <i data-lucide="eye" id="password-toggle-icon" class="w-4 h-4"></i>
+            <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600" onclick="togglePasswordVisibility()">
+              <i data-lucide="eye" id="password-eye-icon" class="w-4 h-4"></i>
             </button>
           </div>
         </div>
 
+        <!-- Restored Access Role dropdown selection menu -->
         <div>
-          <label class="flex items-center text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+          <label for="access-role" class="flex items-center text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
             <i data-lucide="shield" class="w-3.5 h-3.5 mr-1.5 text-gray-500"></i> Access Role
           </label>
           <div class="relative">
-            <select id="login-role" 
+            <select id="access-role" 
               class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50/50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#724867] focus:border-[#724867] focus:bg-white appearance-none cursor-pointer transition-colors">
-              <option value="Product Designer">Employee Portal</option>
-              <option value="HR Administrator">HR Administrator</option>
+              <option value="employee">Employee Portal</option>
+              <option value="manager">Manager Dashboard</option>
+              <option value="hr-admin">HR Administrator</option>
             </select>
             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500">
               <i data-lucide="chevron-down" class="w-4 h-4"></i>
@@ -108,28 +119,33 @@
           </div>
         </div>
 
+        <!-- Submit Button -->
         <button type="submit" 
-          class="w-full flex items-center justify-center space-x-2 bg-[#724867] hover:bg-[#5c3a53] text-white text-sm font-semibold py-3 px-4 rounded-lg shadow-md transition-all cursor-pointer mt-2">
+          class="w-full flex items-center justify-center space-x-2 bg-[#724867] hover:bg-[#5c3a53] text-white text-sm font-semibold py-3 px-4 rounded-lg shadow-md transition-all cursor-pointer">
           <span>Sign In to Dashboard</span>
           <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
       </form>
     </main>
 
+    <!-- Footer -->
     <footer class="w-full text-center mt-4 mb-4">
       <nav class="flex justify-center space-x-4 text-xs font-medium text-gray-600">
         <a href="#" class="hover:underline">Privacy Policy</a>
         <span class="text-gray-400">•</span>
         <a href="#" class="hover:underline">Terms of Service</a>
+        <span class="text-gray-400">•</span>
+        <a href="#" class="hover:underline">Help Center</a>
       </nav>
       <p class="text-[10px] text-gray-500 uppercase tracking-wider mt-3">&copy; 2026 Dayflow Enterprise. All Rights Reserved.</p>
     </footer>
   </div>
 
 
-  <!-- 2. DASHBOARD SCREEN -->
-  <div id="dashboard-screen" class="hidden min-h-screen flex flex-col bg-gray-50">
-    <header class="w-full bg-white border-b border-gray-100 px-6 py-3 flex items-center justify-between sticky top-0 z-40 shadow-xs">
+  <!-- ==================== SCREEN 2: MAIN DASHBOARD SYSTEM ==================== -->
+  <div id="dashboard-screen" class="min-h-screen flex flex-col hidden bg-gray-50">
+    <!-- Top Bar Navigation Frame -->
+    <header class="w-full bg-white border-b border-gray-100 px-6 py-3 flex items-center justify-between sticky top-0 z-40 shadow-sm">
       <div class="flex items-center space-x-12">
         <div class="flex items-center space-x-2">
           <div class="w-8 h-8 bg-[#724867] rounded-lg flex items-center justify-center">
@@ -139,356 +155,328 @@
         </div>
         
         <nav class="hidden md:flex items-center space-x-6">
-          <a href="#" onclick="switchTab('profile')" class="nav-tab-btn flex items-center space-x-1.5 text-sm font-semibold text-gray-900 bg-gray-50 px-3 py-1.5 rounded-lg" id="top-tab-profile">
-            <i data-lucide="layout-dashboard" class="w-4 h-4 text-gray-500"></i>
+          <button onclick="switchTab('profile')" id="nav-tab-profile" class="flex items-center space-x-1.5 text-sm font-semibold text-[#724867] bg-purple-50/50 px-3 py-1.5 rounded-lg tab-nav-btn">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
             <span>Dashboard</span>
-          </a>
-          <a href="#" onclick="switchTab('attendance')" class="nav-tab-btn flex items-center space-x-1.5 text-sm font-medium text-gray-600 hover:text-[#724867] transition-colors" id="top-tab-attendance">
-            <i data-lucide="calendar-check" class="w-4 h-4 text-gray-400"></i>
+          </button>
+          <button onclick="switchTab('attendance')" id="nav-tab-attendance" class="flex items-center space-x-1.5 text-sm font-medium text-gray-600 hover:text-[#724867] transition-colors tab-nav-btn">
+            <i data-lucide="calendar-check" class="w-4 h-4"></i>
             <span>Attendance</span>
-          </a>
-          <a href="#" onclick="switchTab('leave')" class="nav-tab-btn flex items-center space-x-1.5 text-sm font-medium text-gray-600 hover:text-[#724867] transition-colors" id="top-tab-leave">
-            <i data-lucide="clipboard-list" class="w-4 h-4 text-gray-400"></i>
+          </button>
+          <button onclick="switchTab('leave')" id="nav-tab-leave" class="flex items-center space-x-1.5 text-sm font-medium text-gray-600 hover:text-[#724867] transition-colors tab-nav-btn">
+            <i data-lucide="clipboard-list" class="w-4 h-4"></i>
             <span>Leave Requests</span>
-          </a>
+          </button>
         </nav>
       </div>
 
+      <!-- Header Right Session Info -->
       <div class="flex items-center space-x-4">
-        <button onclick="alert('Notification Center: Clean logs.')" class="relative p-2 text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors">
+        <button class="relative p-2 text-gray-400 hover:text-gray-600 bg-gray-50 rounded-full" onclick="alert('Notification Center: 0 new unread operational memos alerts.')">
           <i data-lucide="bell" class="w-5 h-5"></i>
           <span class="absolute top-1 right-1 w-2 h-2 bg-[#724867] rounded-full"></span>
         </button>
         <div class="flex items-center space-x-3 pl-3 border-l border-gray-100">
           <div class="text-right hidden sm:block">
-            <h4 class="text-xs font-bold text-gray-900 db-profile-name">Marcus Thompson</h4>
-            <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider db-profile-role">Product Designer</p>
+            <h4 id="header-user-name" class="text-xs font-bold text-gray-900">Marcus Thompson</h4>
+            <p id="header-user-role" class="text-[10px] text-gray-500 font-medium uppercase tracking-wider">Product Designer</p>
           </div>
           <div class="w-9 h-9 rounded-full bg-gray-200 border border-gray-100 overflow-hidden">
-            <img id="db-profile-avatar-top" src="" alt="Profile Image" class="w-full h-full object-cover">
+            <img id="header-user-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Avatar" class="w-full h-full object-cover">
           </div>
-          <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
         </div>
       </div>
     </header>
 
+    <!-- Main Workspace Container -->
     <div class="flex-1 w-full max-w-[1400px] mx-auto p-6 flex flex-col lg:flex-row gap-6">
-      <!-- SIDEBAR -->
+      
+      <!-- Left Profile Navigation Sidebar Node -->
       <aside class="w-full lg:w-64 shrink-0 flex flex-col gap-6">
-        <div class="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col items-center text-center shadow-xs">
+        <!-- Identity Summary Card -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col items-center text-center shadow-sm">
           <div class="relative w-20 h-20 rounded-full border-4 border-[#724867]/10 p-0.5 mb-3">
-            <img id="db-profile-avatar-side" src="" alt="Profile Image" class="w-full h-full object-cover rounded-full">
-            <span id="attendance-status-dot" class="absolute bottom-0 right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></span>
+            <img id="sidebar-user-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Avatar" class="w-full h-full object-cover rounded-full">
+            <span class="absolute bottom-0 right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></span>
           </div>
-          <h3 class="font-bold text-gray-900 text-base db-profile-name">Marcus Thompson</h3>
-          <p class="text-xs text-gray-500 font-medium mt-0.5 db-profile-role">Product Designer</p>
-          <span id="db-profile-id" class="inline-block bg-gray-100 text-[10px] font-bold text-gray-600 px-2 py-0.5 rounded mt-2 uppercase tracking-wide">Emp-8842</span>
+          <h3 id="sidebar-user-name" class="font-bold text-gray-900 text-base">Marcus Thompson</h3>
+          <p id="sidebar-user-role" class="text-xs text-gray-500 font-medium mt-0.5">Product Designer</p>
+          <span id="sidebar-user-id" class="inline-block bg-gray-100 text-[10px] font-bold text-gray-600 px-2 py-0.5 rounded mt-2 uppercase tracking-wide">EMP-8842</span>
         </div>
 
-        <nav class="bg-white rounded-2xl border border-gray-100 p-2 flex flex-col gap-1 shadow-xs">
-          <button id="side-tab-profile" onclick="switchTab('profile')" class="sidebar-btn flex items-center justify-between px-4 py-3 bg-[#724867] text-white rounded-xl text-sm font-semibold shadow-xs text-left w-full">
+        <!-- Left Menu Sidebar Nav Actions -->
+        <nav class="bg-white rounded-2xl border border-gray-100 p-2 flex flex-col gap-1 shadow-sm">
+          <button onclick="switchTab('profile')" id="side-tab-profile" class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold rounded-xl text-white bg-[#724867] side-nav-btn transition-all">
             <div class="flex items-center space-x-3">
               <i data-lucide="user" class="w-4 h-4"></i>
               <span>Profile Overview</span>
             </div>
             <i data-lucide="chevron-right" class="w-4 h-4 opacity-80"></i>
           </button>
-          <button id="side-tab-attendance" onclick="switchTab('attendance')" class="sidebar-btn flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-[#724867] rounded-xl text-sm font-medium transition-colors text-left w-full">
+          
+          <button onclick="switchTab('attendance')" id="side-tab-attendance" class="w-full flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-[#724867] rounded-xl text-sm font-medium side-nav-btn transition-colors">
             <i data-lucide="calendar-check" class="w-4 h-4 text-gray-400"></i>
-            <span>Attendance Logs</span>
+            <span>Attendance Log</span>
           </button>
-          <button id="side-tab-leave" onclick="switchTab('leave')" class="sidebar-btn flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-[#724867] rounded-xl text-sm font-medium transition-colors text-left w-full">
+          
+          <button onclick="switchTab('leave')" id="side-tab-leave" class="w-full flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-[#724867] rounded-xl text-sm font-medium side-nav-btn transition-colors">
             <i data-lucide="clipboard-list" class="w-4 h-4 text-gray-400"></i>
             <span>Leave Requests</span>
           </button>
+          
           <div class="h-px bg-gray-100 my-2"></div>
-          <button onclick="handleLogout()" class="flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl text-sm font-semibold transition-colors text-left w-full cursor-pointer">
+          
+          <!-- Explicitly isolated, responsive Logout trigger node -->
+          <button onclick="handleLogout()" class="w-full flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl text-sm font-semibold transition-colors mt-auto cursor-pointer">
             <i data-lucide="log-out" class="w-4 h-4"></i>
-            <span>Logout Session</span>
+            <span>Logout Account</span>
           </button>
         </nav>
 
-        <div class="bg-gray-100 rounded-2xl p-5 mt-auto text-center border border-gray-200/50 flex flex-col items-center">
-          <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-500 mb-2.5 shadow-2xs">
+        <!-- HR Support Context Card -->
+        <div class="bg-gray-100 rounded-2xl p-5 text-center border border-gray-200/50 flex flex-col items-center mt-auto">
+          <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-500 mb-2.5 shadow-sm">
             <i data-lucide="help-circle" class="w-4 h-4"></i>
           </div>
           <p class="text-[11px] font-medium text-gray-500 uppercase tracking-wide">Need help?</p>
           <h4 class="text-xs font-bold text-gray-800 mt-0.5">Contact HR Support</h4>
-          <button onclick="alert('Opening support ticketing window...')" class="mt-3 w-full bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold py-2 px-4 rounded-xl border border-gray-200 shadow-2xs transition-colors cursor-pointer">
+          <button onclick="alert('Help Desk: Syncing support ticket dashboard matrix overlay.')" class="mt-3 w-full bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold py-2 px-4 rounded-xl border border-gray-200 shadow-sm transition-colors cursor-pointer">
             Support Center
           </button>
         </div>
       </aside>
 
-      <!-- MAIN CANVAS PANELS -->
-      <main class="flex-1 flex flex-col gap-6">
-        
-        <!-- PANEL A: DASHBOARD VIEW OVERVIEW -->
-        <div id="view-profile" class="dashboard-panel flex flex-col gap-6">
-          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xs relative overflow-hidden">
+
+      <!-- ==================== VIEW CONTENT MODULES ==================== -->
+      <div class="flex-1 flex flex-col gap-6">
+
+        <!-- SUB-VIEW 1: PROFILE OVERVIEW (DASHBOARD DEFAULT) -->
+        <div id="view-profile" class="space-y-6 dashboard-view-tab">
+          <!-- HR Update Banner -->
+          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
             <div class="flex-1 space-y-1">
               <div class="flex items-center space-x-2 text-xs font-bold text-blue-700 uppercase tracking-wider">
                 <i data-lucide="megaphone" class="w-3.5 h-3.5"></i>
                 <span>New HR Update</span>
               </div>
-              <h2 class="text-xl font-bold text-gray-900 tracking-tight">Annual Performance Review Cycle 2024</h2>
-              <p class="text-sm text-gray-600 max-w-2xl leading-relaxed">The Q4 review cycle is now open. Please ensure your self-appraisal is submitted by November 15th.</p>
+              <h2 class="text-xl font-bold text-gray-900 tracking-tight">Annual Performance Review Cycle 2026</h2>
+              <p class="text-sm text-gray-600 max-w-2xl leading-relaxed">The review pipeline configuration matrix is open. Ensure your metrics self-appraisals are submitted correctly before deadline logs close.</p>
               <div class="flex items-center space-x-3 pt-3">
-                <button onclick="alert('Opening Performance Appraisal Module...')" class="bg-[#724867] hover:bg-[#5c3a53] text-white text-xs font-bold py-2 px-4 rounded-xl shadow-xs transition-colors cursor-pointer">Complete Self-Appraisal</button>
-                <button onclick="alert('Opening Guidelines PDF...')" class="bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold py-2 px-4 rounded-xl border border-gray-200 shadow-2xs transition-colors cursor-pointer">View Guidelines</button>
+                <button onclick="alert('Action Link: Triggering Self-Appraisal form modal node.')" class="bg-[#724867] hover:bg-[#5c3a53] text-white text-xs font-bold py-2 px-4 rounded-xl shadow-sm transition-colors cursor-pointer">Complete Self-Appraisal</button>
+                <button onclick="alert('Document view: Loading system guidelines repository file.')" class="bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold py-2 px-4 rounded-xl border border-gray-200 shadow-sm transition-colors cursor-pointer">View Guidelines</button>
               </div>
             </div>
             <div class="hidden md:flex items-center justify-center w-24 h-24 bg-blue-600/10 rounded-2xl border border-blue-200/40 relative">
               <i data-lucide="sparkles" class="w-10 h-10 text-blue-600"></i>
-              <span class="absolute -bottom-1.5 -right-1.5 bg-[#724867] text-[10px] font-bold text-white px-2 py-0.5 rounded-md uppercase tracking-wider shadow-xs">Interest</span>
             </div>
           </div>
 
+          <!-- Section Heading -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-2">
             <div>
-              <h2 class="text-2xl font-bold text-gray-900 tracking-tight" id="dashboard-heading-text">Dashboard Overview</h2>
-              <p class="text-xs text-gray-500 font-medium">Welcome back. Here's what's happening today.</p>
+              <h2 id="dashboard-greeting" class="text-2xl font-bold text-gray-900 tracking-tight">Welcome back, User</h2>
+              <p class="text-xs text-gray-500 font-medium">Here's a breakdown of your enterprise information metrics matrix targets today.</p>
             </div>
-            <div class="flex items-center space-x-1.5 text-xs font-bold text-gray-500 bg-white border border-gray-200/80 px-3 py-1.5 rounded-xl shadow-2xs">
+            <div class="flex items-center space-x-1.5 text-xs font-bold text-gray-500 bg-white border border-gray-200 px-3 py-1.5 rounded-xl shadow-sm">
               <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
               <span>Saturday, August 22, 2026</span>
             </div>
           </div>
 
-          <!-- TOP METRICS CARDS -->
+          <!-- Quick Analytics Row Stats Grids -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div onclick="toggleClockInOut()" class="bg-white p-5 rounded-2xl border border-gray-100 shadow-xs relative flex flex-col justify-between min-h-[130px] cursor-pointer hover:border-gray-300 transition-all group">
+            <!-- Active Clock Container Element Box -->
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative flex flex-col justify-between min-h-[130px]">
               <div>
                 <div class="flex items-center justify-between">
-                  <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Today's Attendance</span>
-                  <span id="attendance-status-badge" class="bg-green-50 text-green-700 border border-green-200 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">Clocked In</span>
+                  <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Shift Presence Tracker</span>
+                  <span id="attendance-badge" class="bg-green-50 text-green-700 border border-green-200 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">ON SHIFT</span>
                 </div>
-                <h3 id="attendance-main-text" class="text-xl font-bold text-gray-900 mt-3">Active (On Time)</h3>
+                <h3 id="attendance-status-txt" class="text-xl font-bold text-gray-900 mt-3">Active System Duty</h3>
               </div>
-              <p id="attendance-sub-text" class="text-xs font-medium text-gray-400 flex items-center mt-2 group-hover:text-[#724867]">
-                <i data-lucide="clock" class="w-3.5 h-3.5 mr-1 text-gray-400"></i> Click to Clock Out
-              </p>
+              <button onclick="toggleAttendanceShift()" id="attendance-btn-trigger" class="mt-4 w-full bg-gray-900 hover:bg-gray-800 text-white text-xs font-semibold py-2 px-3 rounded-xl transition-all flex items-center justify-center space-x-1 cursor-pointer">
+                <i data-lucide="log-out" class="w-3 h-3"></i>
+                <span id="attendance-btn-label">Clock Out of Shift</span>
+              </button>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-xs relative flex flex-col justify-between min-h-[130px]">
+            <!-- Vacation Tracker Card Box Node -->
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative flex flex-col justify-between min-h-[130px]">
               <div>
                 <div class="flex items-center justify-between">
-                  <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Leave Balance</span>
+                  <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Leave Balances Available</span>
                   <span id="pending-leave-badge" class="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">0 Pending</span>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 mt-3">14.5 Days Left</h3>
+                <h3 class="text-xl font-bold text-gray-900 mt-3">14.5 Days Remaining</h3>
               </div>
               <p class="text-xs font-medium text-gray-400 flex items-center mt-2">
-                <i data-lucide="calendar-days" class="w-3.5 h-3.5 mr-1 text-gray-400"></i> Available until Dec 31
+                <i data-lucide="calendar-days" class="w-3.5 h-3.5 mr-1 text-gray-400"></i> Active until end of current cycle
               </p>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-xs relative flex flex-col justify-between min-h-[130px]">
+            <!-- Payslip Estimation Tracker -->
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative flex flex-col justify-between min-h-[130px]">
               <div>
                 <div class="flex items-center justify-between">
-                  <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Estimated Payday</span>
+                  <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Next Payroll Generation</span>
                   <i data-lucide="credit-card" class="w-4 h-4 text-gray-300"></i>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 mt-3">Oct 31, 2023</h3>
+                <h3 class="text-xl font-bold text-gray-900 mt-3">August 31, 2026</h3>
               </div>
               <p class="text-xs font-medium text-gray-400 flex items-center mt-2">
-                <i data-lucide="help-circle" class="w-3.5 h-3.5 mr-1 text-gray-400"></i> Next scheduled disbursement
+                <i data-lucide="help-circle" class="w-3.5 h-3.5 mr-1 text-gray-400"></i> Scheduled automation run disbursement
               </p>
             </div>
           </div>
 
-          <!-- PAYSLIPS TABLE -->
-          <section class="bg-white rounded-2xl border border-gray-100 shadow-xs p-6">
+          <!-- Data Grid: Recent Payslips -->
+          <section class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
               <div class="flex items-center space-x-2">
                 <i data-lucide="wallet" class="text-gray-400 w-5 h-5"></i>
-                <h3 class="font-bold text-gray-900 text-base">Recent Payslips</h3>
+                <h3 class="font-bold text-gray-900 text-base">Recent Ledger Payslips</h3>
               </div>
-              <a href="#" onclick="alert('Viewing full payslip repository...')" class="text-xs font-bold text-[#724867] hover:underline flex items-center space-x-0.5">
-                <span>View Full History</span>
+              <button onclick="alert('Data Module Action: Loading full compensation records ledger matrix.')" class="text-xs font-bold text-[#724867] hover:underline flex items-center space-x-0.5">
+                <span>View Full Payroll History</span>
                 <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-              </a>
+              </button>
             </div>
-
             <div class="overflow-x-auto">
               <table class="w-full text-left border-collapse">
                 <thead>
                   <tr class="border-b border-gray-100">
-                    <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3 w-1/5">Reference ID</th>
-                    <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3 w-1/5">Payment Period</th>
-                    <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3 w-1/5">Release Date</th>
-                    <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3 w-1/5">Net Amount</th>
-                    <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3 w-1/6">Status</th>
+                    <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Reference Token</th>
+                    <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Disbursement Period</th>
+                    <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Release Timestamp</th>
+                    <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Net Payment Allocation</th>
+                    <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Processing Status</th>
                     <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 text-sm font-medium text-gray-800">
                   <tr class="hover:bg-gray-50/50 transition-colors">
-                    <td class="py-3.5 font-mono text-xs text-gray-500">SL-2023-10</td>
-                    <td class="py-3.5">October 2023</td>
-                    <td class="py-3.5 text-gray-500 font-normal">Oct 31, 2023</td>
+                    <td class="py-3.5 font-mono text-xs text-gray-500">DF-PS-2026-07</td>
+                    <td class="py-3.5">July 2026</td>
+                    <td class="py-3.5 text-gray-500 font-normal">Jul 31, 2026</td>
                     <td class="py-3.5 font-semibold text-gray-900">$4,250.00</td>
-                    <td class="py-3.5"><span class="inline-flex items-center text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-md font-medium border border-green-200/50"><span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>Paid</span></td>
-                    <td class="py-3.5 text-right"><button onclick="alert('Downloading PDF for SL-2023-10...')" class="p-1.5 text-gray-400 hover:text-[#724867] bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"><i data-lucide="download" class="w-4 h-4"></i></button></td>
+                    <td class="py-3.5"><span class="inline-flex items-center text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-md font-medium border border-green-200/50"><span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>Settled</span></td>
+                    <td class="py-3.5 text-right"><button onclick="alert('File download triggered: Copy of payslip PDF token reference packed inside browser download loop.')" class="p-1.5 text-gray-400 hover:text-[#724867] bg-gray-50 rounded-lg cursor-pointer"><i data-lucide="download" class="w-4 h-4"></i></button></td>
                   </tr>
                   <tr class="hover:bg-gray-50/50 transition-colors">
-                    <td class="py-3.5 font-mono text-xs text-gray-500">SL-2023-89</td>
-                    <td class="py-3.5">September 2023</td>
-                    <td class="py-3.5 text-gray-500 font-normal">Sep 30, 2023</td>
+                    <td class="py-3.5 font-mono text-xs text-gray-500">DF-PS-2026-06</td>
+                    <td class="py-3.5">June 2026</td>
+                    <td class="py-3.5 text-gray-500 font-normal">Jun 30, 2026</td>
                     <td class="py-3.5 font-semibold text-gray-900">$4,250.00</td>
-                    <td class="py-3.5"><span class="inline-flex items-center text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-md font-medium border border-green-200/50"><span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>Paid</span></td>
-                    <td class="py-3.5 text-right"><button onclick="alert('Downloading PDF for SL-2023-89...')" class="p-1.5 text-gray-400 hover:text-[#724867] bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"><i data-lucide="download" class="w-4 h-4"></i></button></td>
-                  </tr>
-                  <tr class="hover:bg-gray-50/50 transition-colors">
-                    <td class="py-3.5 font-mono text-xs text-gray-500">SL-2023-88</td>
-                    <td class="py-3.5">August 2023</td>
-                    <td class="py-3.5 text-gray-500 font-normal">Aug 31, 2023</td>
-                    <td class="py-3.5 font-semibold text-gray-900">$4,100.00</td>
-                    <td class="py-3.5"><span class="inline-flex items-center text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-md font-medium border border-green-200/50"><span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>Paid</span></td>
-                    <td class="py-3.5 text-right"><button onclick="alert('Downloading PDF for SL-2023-88...')" class="p-1.5 text-gray-400 hover:text-[#724867] bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"><i data-lucide="download" class="w-4 h-4"></i></button></td>
+                    <td class="py-3.5"><span class="inline-flex items-center text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-md font-medium border border-green-200/50"><span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>Settled</span></td>
+                    <td class="py-3.5 text-right"><button onclick="alert('File download triggered.')" class="p-1.5 text-gray-400 hover:text-[#724867] bg-gray-50 rounded-lg cursor-pointer"><i data-lucide="download" class="w-4 h-4"></i></button></td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </section>
 
-          <!-- SPLIT LOWER GRID -->
+          <!-- Split Bottom Grid Maps: Office Holidays & Action Grid Shortcuts -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white border border-gray-100 shadow-xs rounded-2xl p-6">
+            <!-- Office Calendar Holidays Segment -->
+            <div class="bg-white border border-gray-100 shadow-sm rounded-2xl p-6">
               <div class="border-b border-gray-100 pb-3 mb-4">
-                <h3 class="font-bold text-gray-900 text-base">Upcoming Office Holidays</h3>
-                <p class="text-xs text-gray-400 font-medium mt-0.5">Corporate events for the current quarter.</p>
+                <h3 class="font-bold text-gray-900 text-base">Corporate Office Holidays Calendar</h3>
+                <p class="text-xs text-gray-400 font-medium mt-0.5">Corporate calendar milestones scheduled for current operational cycle interval blocks.</p>
               </div>
               <div class="space-y-4">
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
                   <div>
-                    <h4 class="text-sm font-semibold text-gray-800">Diwali Break</h4>
-                    <p class="text-xs font-medium text-gray-400 mt-0.5">Nov 12 - Nov 14</p>
+                    <h4 class="text-sm font-semibold text-gray-800">Independence Day Recess</h4>
+                    <p class="text-xs font-medium text-gray-400 mt-0.5">August 15</p>
                   </div>
-                  <span class="text-[10px] font-bold text-gray-500 bg-gray-200 px-2 py-0.5 rounded-md uppercase tracking-wider">Public</span>
+                  <span class="text-[10px] font-bold text-gray-500 bg-gray-200 px-2 py-0.5 rounded-md uppercase tracking-wider">Statutory</span>
                 </div>
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
                   <div>
-                    <h4 class="text-sm font-semibold text-gray-800">Corporate Anniversary</h4>
-                    <p class="text-xs font-medium text-gray-400 mt-0.5">Dec 05</p>
+                    <h4 class="text-sm font-semibold text-gray-800">Enterprise Foundation Gala</h4>
+                    <p class="text-xs font-medium text-gray-400 mt-0.5">September 04</p>
                   </div>
-                  <span class="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md uppercase tracking-wider">Event</span>
+                  <span class="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md uppercase tracking-wider">Event Milestone</span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+                  <div>
+                    <h4 class="text-sm font-semibold text-gray-800">Gandhi Jayanti Observance</h4>
+                    <p class="text-xs font-medium text-gray-400 mt-0.5">October 02</p>
+                  </div>
+                  <span class="text-[10px] font-bold text-gray-500 bg-gray-200 px-2 py-0.5 rounded-md uppercase tracking-wider">Statutory</span>
                 </div>
               </div>
             </div>
 
-            <div class="bg-white border border-gray-100 shadow-xs rounded-2xl p-6">
+            <!-- Action Grid Shortcuts Box Node -->
+            <div class="bg-white border border-gray-100 shadow-sm rounded-2xl p-6">
               <div class="border-b border-gray-100 pb-3 mb-4">
-                <h3 class="font-bold text-gray-900 text-base">Quick Action Shortcuts</h3>
-                <p class="text-xs text-gray-400 font-medium mt-0.5">Commonly used HR operations.</p>
+                <h3 class="font-bold text-gray-900 text-base">Quick Operational Utility Actions</h3>
+                <p class="text-xs text-gray-400 font-medium mt-0.5">Instantly route workflows using shortcuts.</p>
               </div>
               <div class="grid grid-cols-2 gap-4">
-                <button onclick="switchTab('leave')" class="flex flex-col text-left p-4 bg-gray-50 hover:bg-gray-100/70 border border-gray-200/60 rounded-xl group transition-all text-sm cursor-pointer">
-                  <div class="w-8 h-8 rounded-lg bg-white shadow-2xs flex items-center justify-center text-gray-500 group-hover:text-[#724867] mb-3">
-                    <i data-lucide="plane" class="w-4 h-4"></i>
+                <button onclick="switchTab('leave')" class="flex flex-col text-left p-4 bg-gray-50 hover:bg-gray-100/70 border border-gray-200 hover:border-[#724867]/20 rounded-xl group transition-all text-sm cursor-pointer">
+                  <div class="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-gray-500 group-hover:text-[#724867] transition-colors mb-3">
+                    <i data-lucide="plane"></i>
                   </div>
-                  <h4 class="font-bold text-gray-900 group-hover:text-[#724867]">Request Time Off</h4>
-                  <p class="text-xs text-gray-400 font-medium mt-0.5">vacation, sick leave</p>
+                  <h4 class="font-bold text-gray-900 group-hover:text-[#724867] transition-colors">File Time Off</h4>
+                  <p class="text-xs text-gray-400 font-medium mt-0.5 leading-snug">Request leaves balance allocation</p>
                 </button>
-                <button onclick="switchTab('attendance')" class="flex flex-col text-left p-4 bg-gray-50 hover:bg-gray-100/70 border border-gray-200/60 rounded-xl group transition-all text-sm cursor-pointer">
-                  <div class="w-8 h-8 rounded-lg bg-white shadow-2xs flex items-center justify-center text-gray-500 group-hover:text-[#724867] mb-3">
-                    <i data-lucide="user-cog" class="w-4 h-4"></i>
+                <button onclick="alert('Utility Modal Action: Initializing structural Profile settings editor interface matrix overlay.')" class="flex flex-col text-left p-4 bg-gray-50 hover:bg-gray-100/70 border border-gray-200 hover:border-[#724867]/20 rounded-xl group transition-all text-sm cursor-pointer">
+                  <div class="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-gray-500 group-hover:text-[#724867] transition-colors mb-3">
+                    <i data-lucide="user-cog"></i>
                   </div>
-                  <h4 class="font-bold text-gray-900 group-hover:text-[#724867]">Attendance Logs</h4>
-                  <p class="text-xs text-gray-400 font-medium mt-0.5">shift updates</p>
+                  <h4 class="font-bold text-gray-900 group-hover:text-[#724867] transition-colors">Modify Profile</h4>
+                  <p class="text-xs text-gray-400 font-medium mt-0.5 leading-snug">Banking configuration fields data</p>
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- PANEL B: ATTENDANCE LOGS -->
-        <div id="view-attendance" class="dashboard-panel hidden bg-white rounded-2xl border border-gray-100 p-6 shadow-xs">
-          <div class="border-b border-gray-100 pb-4 mb-4 flex justify-between items-center">
-            <div>
-              <h3 class="font-bold text-gray-900 text-lg">Detailed Attendance History</h3>
-              <p class="text-xs text-gray-400">View real-time punch timestamps and track your hours worked.</p>
+
+        <!-- SUB-VIEW 2: ATTENDANCE TRACKING SYSTEM VIEWPORT -->
+        <div id="view-attendance" class="space-y-6 dashboard-view-tab hidden">
+          <div class="border-b border-gray-100 pb-2">
+            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Shift Presence & Chrono Logs</h2>
+            <p class="text-xs text-gray-500 font-medium">Review running verification timestamps tracked dynamically via browser localization tokens.</p>
+          </div>
+
+          <!-- Log Summary Summary Container -->
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
+              <h3 class="font-bold text-gray-900 text-base flex items-center gap-2">
+                <i data-lucide="clock" class="text-gray-400 w-5 h-5"></i>
+                <span>Historical Attendance Time Tracking Card Ledger</span>
+              </h3>
             </div>
-            <button onclick="toggleClockInOut()" id="attendance-panel-trigger" class="bg-[#724867] text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-[#5c3a53]">
-              Clock Out Now
-            </button>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="border-b border-gray-100 text-[11px] font-bold text-gray-400 uppercase">
-                  <th class="pb-3">Date</th>
-                  <th class="pb-3">Punch In</th>
-                  <th class="pb-3">Punch Out</th>
-                  <th class="pb-3">Total Duration</th>
-                  <th class="pb-3">Status</th>
-                </tr>
-              </thead>
-              <tbody id="attendance-log-rows" class="divide-y divide-gray-50 text-sm text-gray-800">
-                <tr>
-                  <td class="py-3 font-semibold">Aug 22, 2026</td>
-                  <td class="py-3 text-gray-500">08:52:10 AM</td>
-                  <td class="py-3 text-gray-400" id="current-row-out">--:--:--</td>
-                  <td class="py-3 font-medium text-gray-900" id="current-row-duration">In Progress</td>
-                  <td class="py-3"><span id="current-row-badge" class="bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs border border-green-200">Active</span></td>
-                </tr>
-                <tr>
-                  <td class="py-3 font-semibold">Aug 21, 2026</td>
-                  <td class="py-3 text-gray-500">08:45:00 AM</td>
-                  <td class="py-3 text-gray-500">05:15:00 PM</td>
-                  <td class="py-3 font-medium text-gray-900">8h 30m</td>
-                  <td class="py-3"><span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs">Completed</span></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- PANEL C: LEAVE REQUEST SUBMISSION QUEUE -->
-        <div id="view-leave" class="dashboard-panel hidden grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-xs md:col-span-1">
-            <h3 class="font-bold text-gray-900 text-base border-b border-gray-100 pb-3 mb-4">Request New Time Off</h3>
-            <form id="leave-form" class="space-y-4" onsubmit="handleLeaveSubmit(event)">
-              <div>
-                <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Leave Classification</label>
-                <select id="leave-type" class="block w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50/50">
-                  <option value="Annual Paid Leave">Annual Paid Leave</option>
-                  <option value="Medical Sick Leave">Medical Sick Leave</option>
-                  <option value="Casual Unpaid Leave">Casual Unpaid Leave</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Commencement Date</label>
-                <input type="date" id="leave-start" value="2026-09-10" required class="block w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50/50">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Conclusion Date</label>
-                <input type="date" id="leave-end" value="2026-09-14" required class="block w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50/50">
-              </div>
-              <button type="submit" class="w-full bg-[#724867] hover:bg-[#5c3a53] text-white text-xs font-bold py-3 rounded-lg shadow-xs transition-colors cursor-pointer">
-                Submit Leave Application
-              </button>
-            </form>
-          </div>
-
-          <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-xs md:col-span-2">
-            <h3 class="font-bold text-gray-900 text-base border-b border-gray-100 pb-3 mb-4">Leave Application Registry</h3>
+            
             <div class="overflow-x-auto">
               <table class="w-full text-left border-collapse">
                 <thead>
-                  <tr class="border-b border-gray-100 text-[11px] font-bold text-gray-400 uppercase">
-                    <th class="pb-3">Type</th>
-                    <th class="pb-3">Timeline Dates</th>
-                    <th class="pb-3">Total Days</th>
-                    <th class="pb-3">Approval Status</th>
+                  <tr class="border-b border-gray-100">
+                    <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Calendar Date</th>
+                    <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Clock In Time</th>
+                    <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Clock Out Time</th>
+                    <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Total Presence Duration</th>
+                    <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Compliance State</th>
                   </tr>
                 </thead>
-                <tbody id="leave-log-rows" class="divide-y divide-gray-50 text-sm text-gray-800">
-                  <tr>
-                    <td class="py-3 font-semibold">Annual Paid Leave</td>
-                    <td class="py-3 text-gray-500">Nov 14 - Nov 18, 2026</td>
-                    <td class="py-3 font-medium">4 Days</td>
-                    <td class="py-3"><span class="bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs border border-green-200">Approved</span></td>
+                <tbody id="attendance-log-tbody" class="divide-y divide-gray-50 text-sm font-medium text-gray-800">
+                  <!-- Real timestamps will append here live dynamically -->
+                  <tr class="hover:bg-gray-50/50 transition-colors">
+                    <td class="py-3.5">August 21, 2026</td>
+                    <td class="py-3.5 text-gray-600 font-mono text-xs">09:02 AM</td>
+                    <td class="py-3.5 text-gray-600 font-mono text-xs">06:05 PM</td>
+                    <td class="py-3.5 font-semibold text-gray-900">9 hrs 3 mins</td>
+                    <td class="py-3.5"><span class="inline-flex items-center text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-md font-medium border border-green-200/50">On Time Compliance</span></td>
+                  </tr>
+                  <tr class="hover:bg-gray-50/50 transition-colors">
+                    <td class="py-3.5">August 20, 2026</td>
+                    <td class="py-3.5 text-gray-600 font-mono text-xs">08:55 AM</td>
+                    <td class="py-3.5 text-gray-600 font-mono text-xs">05:58 PM</td>
+                    <td class="py-3.5 font-semibold text-gray-900">9 hrs 3 mins</td>
+                    <td class="py-3.5"><span class="inline-flex items-center text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-md font-medium border border-green-200/50">On Time Compliance</span></td>
                   </tr>
                 </tbody>
               </table>
@@ -496,28 +484,98 @@
           </div>
         </div>
 
-      </main>
+
+        <!-- SUB-VIEW 3: LEAVE REQUEST DISPATCH ARCHITECTURE -->
+        <div id="view-leave" class="space-y-6 dashboard-view-tab hidden">
+          <div class="border-b border-gray-100 pb-2">
+            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Time Off Leave Allocation Requests</h2>
+            <p class="text-xs text-gray-500 font-medium">Dispatch running leave request items into HR management authorization loop arrays instantly.</p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            <!-- Left Grid Pane Form Column -->
+            <div class="bg-white border border-gray-100 shadow-sm rounded-2xl p-6 lg:col-span-1">
+              <h3 class="font-bold text-gray-900 text-base border-b border-gray-100 pb-3 mb-4">File Allocation Request</h3>
+              
+              <form class="space-y-4" onsubmit="handleLeaveFormSubmission(event)">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Leave Categorization Classification</label>
+                  <select id="leave-type-select" class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50/50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#724867]">
+                    <option value="Paid Annual Leave">Paid Annual Leave</option>
+                    <option value="Medical Sick Isolation">Medical Sick Isolation</option>
+                    <option value="Casual Discretionary Absence">Casual Discretionary Absence</option>
+                  </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Timeline Start</label>
+                    <input type="date" id="leave-start-input" required class="block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50/50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#724867]">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Timeline End</label>
+                    <input type="date" id="leave-end-input" required class="block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50/50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#724867]">
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Statement Justification Notes</label>
+                  <textarea id="leave-reason-textarea" rows="3" required placeholder="State operational absence logic parameters concisely for review matrix profiles..." class="block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50/50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#724867]"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-[#724867] hover:bg-[#5c3a53] text-white text-xs font-bold py-2.5 px-4 rounded-lg shadow-sm transition-colors cursor-pointer">
+                  Dispatch Request Into Queue
+                </button>
+              </form>
+            </div>
+
+            <!-- Right Queue Live History Tracker View Column -->
+            <div class="bg-white border border-gray-100 shadow-sm rounded-2xl p-6 lg:col-span-2">
+              <h3 class="font-bold text-gray-900 text-base border-b border-gray-100 pb-3 mb-4">Absence Request Verification Tracking History</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="border-b border-gray-100">
+                      <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Classification Type</th>
+                      <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Timeline Interval Dates</th>
+                      <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Duration Compute</th>
+                      <th class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pb-3">Workflow State Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="leave-history-tbody" class="divide-y divide-gray-50 text-sm font-medium text-gray-800">
+                    <!-- Dynamic form rows appended securely here inside thread loop context -->
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                      <td class="py-3.5">Paid Annual Leave</td>
+                      <td class="py-3.5 text-gray-500 font-normal">Sep 10, 2026 - Sep 12, 2026</td>
+                      <td class="py-3.5">3 Full Days</td>
+                      <td class="py-3.5"><span class="inline-flex items-center text-xs text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md font-medium border border-blue-200/50">Approved Compliance</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
 
+    <!-- System Status Footer Component -->
     <footer class="w-full bg-white border-t border-gray-100 px-6 py-4 mt-12 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-semibold text-gray-500 tracking-wide">
       <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
         <div class="flex items-center space-x-1.5 text-green-600 bg-green-50 px-2 py-1 rounded-md border border-green-200/30">
           <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-          <span class="text-[10px] uppercase font-bold tracking-wider">System Status: Operational</span>
+          <span class="text-[10px] uppercase font-bold tracking-wider">System Status: Connected Operational</span>
         </div>
       </div>
-      <div class="flex items-center gap-2">
-        <span class="text-gray-400 font-normal">&copy; 2026 Dayflow HRMS Enterprise</span>
-      </div>
+      <p class="text-[10px] font-bold text-gray-400 uppercase">&copy; 2026 Dayflow HRMS System Operations Ecosystem.</p>
     </footer>
   </div>
 
-  <!-- INTERACTIVE JAVA SCRIPT DATA ENGINE CORE -->
+
+  <!-- ==================== LOGIC IMPLEMENTATION BACKEND STATE ENGINE ==================== -->
   <script>
-    // Local In-Memory Mock Profiles Database
-    const userDatabase = {
+    // Local In-Memory System Database Simulation Array Nodes
+    const MOCK_DB_USERS = {
       "EMP-8842": {
-        id: "EMP-8842",
+        employeeId: "EMP-8842",
         email: "marcus.t@dayflow.com",
         password: "password123",
         name: "Marcus Thompson",
@@ -525,7 +583,7 @@
         avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"
       },
       "EMP-10293": {
-        id: "EMP-10293",
+        employeeId: "EMP-10293",
         email: "alex.morgan@dayflow.com",
         password: "admin123",
         name: "Alex Morgan",
@@ -534,190 +592,189 @@
       }
     };
 
-    let currentUser = null;
-    let isClockedIn = true;
-    let pendingLeaveCount = 0;
+    // System Variable State Flags
+    let systemOnShiftState = true;
+    let computedPendingLeaveRequestsCount = 0;
 
-    // Login Form interceptor
-    document.getElementById("login-form").addEventListener("submit", function(e) {
-      e.preventDefault();
-      const empId = document.getElementById("login-id").value.trim();
-      const email = document.getElementById("login-email").value.trim();
-      const pass = document.getElementById("login-password").value;
-      const errorBanner = document.getElementById("login-error-banner");
-
-      const account = userDatabase[empId];
-
-      if (account && account.email === email && account.password === pass) {
-        currentUser = account;
-        errorBanner.classList.add("hidden");
-        bootDashboard();
-      } else {
-        errorBanner.classList.remove("hidden");
-      }
+    // Trigger vector layer parsing engine automatically
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
     });
 
     function togglePasswordVisibility() {
-      const field = document.getElementById("login-password");
-      const icon = document.getElementById("password-toggle-icon");
-      if (field.type === "password") {
-        field.type = "text";
-        icon.setAttribute("data-lucide", "eye-off");
+      const passField = document.getElementById("password");
+      if(passField.type === "password") {
+        passField.type = "text";
+        document.getElementById("password-eye-icon").setAttribute("data-lucide", "eye-off");
       } else {
-        field.type = "password";
-        icon.setAttribute("data-lucide", "eye");
+        passField.type = "password";
+        document.getElementById("password-eye-icon").setAttribute("data-lucide", "eye");
       }
       lucide.createIcons();
     }
 
-    function bootDashboard() {
-      // Toggle display views
-      document.getElementById("login-screen").classList.add("hidden");
-      document.getElementById("dashboard-screen").classList.remove("hidden");
+    // Login Submission Logic Processing Node Route
+    function handleLogin(event) {
+      event.preventDefault();
+      const inputEmpId = document.getElementById("employee-id").value.trim();
+      const inputEmail = document.getElementById("email").value.trim();
+      const inputPass = document.getElementById("password").value;
+      const errorMsgBox = document.getElementById("login-error");
 
-      // Inject data values
-      const names = document.getElementsByClassName("db-profile-name");
-      const roles = document.getElementsByClassName("db-profile-role");
-      
-      for(let n of names) n.textContent = currentUser.name;
-      for(let r of roles) r.textContent = currentUser.role;
-      
-      document.getElementById("db-profile-id").textContent = currentUser.id;
-      document.getElementById("db-profile-avatar-top").src = currentUser.avatar;
-      document.getElementById("db-profile-avatar-side").src = currentUser.avatar;
-      document.getElementById("dashboard-heading-text").textContent = "Dashboard Overview";
+      errorMsgBox.classList.add("hidden");
 
-      switchTab('profile');
+      // Verify input bounds directly against system credential nodes
+      const verifiedProfile = MOCK_DB_USERS[inputEmpId];
+
+      if (verifiedProfile && verifiedProfile.email === inputEmail && verifiedProfile.password === inputPass) {
+        // Hydrate configuration parameters onto global document node text bindings
+        document.getElementById("header-user-name").textContent = verifiedProfile.name;
+        document.getElementById("header-user-role").textContent = verifiedProfile.role;
+        document.getElementById("header-user-avatar").src = verifiedProfile.avatar;
+
+        document.getElementById("sidebar-user-name").textContent = verifiedProfile.name;
+        document.getElementById("sidebar-user-role").textContent = verifiedProfile.role;
+        document.getElementById("sidebar-user-id").textContent = verifiedProfile.employeeId;
+        
+        const avatarImageNodes = document.querySelectorAll("#sidebar-user-avatar");
+        avatarImageNodes.forEach(node => node.src = verifiedProfile.avatar);
+
+        document.getElementById("dashboard-greeting").textContent = `Welcome back, ${verifiedProfile.name.split(' ')[0]}!`;
+
+        // Switch Viewport Screen States safely
+        document.getElementById("login-screen").classList.add("hidden");
+        document.getElementById("dashboard-screen").classList.remove("hidden");
+        
+        // Reset tab defaults
+        switchTab('profile');
+      } else {
+        errorMsgBox.classList.remove("hidden");
+      }
     }
 
-    function switchTab(targetTab) {
-      // Hide all panels
-      const panels = document.getElementsByClassName("dashboard-panel");
-      for(let p of panels) p.classList.add("hidden");
+    // Tab Router View Controller State Processor
+    function switchTab(targetTabId) {
+      // Hide all standard sub views
+      const viewTabs = document.querySelectorAll(".dashboard-view-tab");
+      viewTabs.forEach(view => view.classList.add("hidden"));
 
-      // Reveal correct target view panel
-      document.getElementById(`view-${targetTab}`).classList.remove("hidden");
+      // Display selected target sub view
+      if(targetTabId === 'profile') document.getElementById("view-profile").classList.remove("hidden");
+      if(targetTabId === 'attendance') document.getElementById("view-attendance").classList.remove("hidden");
+      if(targetTabId === 'leave') document.getElementById("view-leave").classList.remove("hidden");
 
-      // Reset style bindings across all buttons
-      const tabButtons = document.querySelectorAll(".nav-tab-btn, .sidebar-btn");
-      tabButtons.forEach(btn => {
-        if(btn.id.includes(targetTab)) {
-          if(btn.classList.contains("sidebar-btn")) {
-            btn.className = "sidebar-btn flex items-center justify-between px-4 py-3 bg-[#724867] text-white rounded-xl text-sm font-semibold shadow-xs text-left w-full";
-          } else {
-            btn.className = "nav-tab-btn flex items-center space-x-1.5 text-sm font-semibold text-gray-900 bg-gray-50 px-3 py-1.5 rounded-lg";
-          }
-        } else {
-          if(btn.classList.contains("sidebar-btn")) {
-            btn.className = "sidebar-btn flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-[#724867] rounded-xl text-sm font-medium transition-colors text-left w-full";
-          } else {
-            btn.className = "nav-tab-btn flex items-center space-x-1.5 text-sm font-medium text-gray-600 hover:text-[#724867] transition-colors";
-          }
-        }
+      // Synchronize button rendering state highlights
+      const navButtons = document.querySelectorAll(".tab-nav-btn, .side-nav-btn");
+      navButtons.forEach(btn => {
+        btn.classList.remove("bg-[#724867]", "text-white", "bg-purple-50/50", "text-[#724867]");
+        btn.classList.add("text-gray-600");
       });
-      lucide.createIcons();
-    }
 
-    function toggleClockInOut() {
-      const badge = document.getElementById("attendance-status-badge");
-      const dot = document.getElementById("attendance-status-dot");
-      const mainText = document.getElementById("attendance-main-text");
-      const subText = document.getElementById("attendance-sub-text");
-      const panelBtn = document.getElementById("attendance-panel-trigger");
+      // Highlight active links
+      const activeNavBtn = document.getElementById(`nav-tab-${targetTabId}`);
+      const activeSideBtn = document.getElementById(`side-tab-${targetTabId}`);
 
-      const crowOut = document.getElementById("current-row-out");
-      const crowDur = document.getElementById("current-row-duration");
-      const crowBadge = document.getElementById("current-row-badge");
-
-      const now = new Date();
-      const stamp = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-
-      if (isClockedIn) {
-        // Clocking out state transformation
-        isClockedIn = false;
-        badge.className = "bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider";
-        badge.textContent = "Clocked Out";
-        dot.className = "absolute bottom-0 right-1 w-4 h-4 bg-red-500 border-2 border-white rounded-full";
-        mainText.textContent = "Shift Concluded";
-        subText.innerHTML = `<i data-lucide='clock' class='w-3.5 h-3.5 mr-1 text-gray-400'></i> Clocked Out at ${stamp}`;
-        panelBtn.textContent = "Clock Into Shift";
-
-        if(crowOut) crowOut.textContent = stamp;
-        if(crowDur) crowDur.textContent = "9h 08m";
-        if(crowBadge) {
-          crowBadge.className = "bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs";
-          crowBadge.textContent = "Completed";
-        }
-      } else {
-        // Clocking into shift recovery 
-        isClockedIn = true;
-        badge.className = "bg-green-50 text-green-700 border border-green-200 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider";
-        badge.textContent = "Clocked In";
-        dot.className = "absolute bottom-0 right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full";
-        mainText.textContent = "Active (On Time)";
-        subText.innerHTML = `<i data-lucide='clock' class='w-3.5 h-3.5 mr-1 text-gray-400'></i> Click to Clock Out`;
-        panelBtn.textContent = "Clock Out Now";
-
-        // Prepend fresh layout row track
-        const logTable = document.getElementById("attendance-log-rows");
-        const freshRow = document.createElement("tr");
-        freshRow.innerHTML = `
-          <td class="py-3 font-semibold">Aug 22, 2026</td>
-          <td class="py-3 text-gray-500">${stamp}</td>
-          <td class="py-3 text-gray-400" id="current-row-out">--:--:--</td>
-          <td class="py-3 font-medium text-gray-900" id="current-row-duration">In Progress</td>
-          <td class="py-3"><span id="current-row-badge" class="bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs border border-green-200">Active</span></td>
-        `;
-        logTable.insertBefore(freshRow, logTable.firstChild);
+      if(activeNavBtn) {
+        activeNavBtn.classList.remove("text-gray-600");
+        activeNavBtn.classList.add("text-[#724867]", "bg-purple-50/50");
       }
-      lucide.createIcons();
+      if(activeSideBtn) {
+        activeSideBtn.classList.remove("text-gray-600");
+        activeSideBtn.classList.add("bg-[#724867]", "text-white");
+      }
     }
 
-    function handleLeaveSubmit(e) {
-      e.preventDefault();
-      const type = document.getElementById("leave-type").value;
-      const start = new Date(document.getElementById("leave-start").value);
-      const end = new Date(document.getElementById("leave-end").value);
+    // Shift Presence Tracker Dynamic Component Handler
+    function toggleAttendanceShift() {
+      const badge = document.getElementById("attendance-badge");
+      const textStatus = document.getElementById("attendance-status-txt");
+      const triggerBtnLabel = document.getElementById("attendance-btn-label");
+      const triggerBtn = document.getElementById("attendance-btn-trigger");
+      const logTableBody = document.getElementById("attendance-log-tbody");
 
-      if (end < start) {
-        alert("Error: Conclusion Date cannot fall before the Commencement Date.");
+      const currentTimeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      if (systemOnShiftState) {
+        // Clock user out of running session operations state
+        systemOnShiftState = false;
+        badge.className = "bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider";
+        badge.textContent = "OFF DUTY";
+        textStatus.textContent = "Shift Concluded";
+        triggerBtnLabel.textContent = "Clock Into System Shift";
+        triggerBtn.className = "mt-4 w-full bg-green-700 hover:bg-green-600 text-white text-xs font-semibold py-2 px-3 rounded-xl transition-all flex items-center justify-center space-x-1 cursor-pointer";
+
+        // Ingress modern clock-out timeline event listing entry
+        const row = document.createElement("tr");
+        row.className = "hover:bg-gray-50/50 transition-colors font-medium";
+        row.innerHTML = `
+          <td class="py-3.5">Today (August 22, 2026)</td>
+          <td class="py-3.5 text-gray-600 font-mono text-xs">08:52 AM</td>
+          <td class="py-3.5 text-gray-600 font-mono text-xs">${currentTimeString}</td>
+          <td class="py-3.5 font-semibold text-gray-900">Session Complete</td>
+          <td class="py-3.5"><span class="inline-flex items-center text-xs text-gray-700 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-200">Logged Out</span></td>
+        `;
+        logTableBody.insertBefore(row, logTableBody.firstChild);
+      } else {
+        // Reset presence layer state flags back to live check validation profiles
+        systemOnShiftState = true;
+        badge.className = "bg-green-50 text-green-700 border border-green-200 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider";
+        badge.textContent = "ON SHIFT";
+        textStatus.textContent = "Active System Duty";
+        triggerBtnLabel.textContent = "Clock Out of Shift";
+        triggerBtn.className = "mt-4 w-full bg-gray-900 hover:bg-gray-800 text-white text-xs font-semibold py-2 px-3 rounded-xl transition-all flex items-center justify-center space-x-1 cursor-pointer";
+      }
+    }
+
+    // Leave Queue Record Form Data Handler Pipeline
+    function handleLeaveFormSubmission(event) {
+      event.preventDefault();
+      const leaveType = document.getElementById("leave-type-select").value;
+      const startDateVal = document.getElementById("leave-start-input").value;
+      const endDateVal = document.getElementById("leave-end-input").value;
+      const historyTableBody = document.getElementById("leave-history-tbody");
+
+      // Simple Duration Computation Days Matrix Logic
+      const d1 = new Date(startDateVal);
+      const d2 = new Date(endDateVal);
+      const diffTime = Math.abs(d2 - d1);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+      if(d2 < d1) {
+        alert("Configuration constraint issue: Timeline termination bounds cannot set earlier than creation nodes.");
         return;
       }
 
-      const diffTime = Math.abs(end - start);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-
-      // Add table log node row
-      const logBody = document.getElementById("leave-log-rows");
-      const newRow = document.createElement("tr");
-      newRow.innerHTML = `
-        <td class="py-3 font-semibold">${type}</td>
-        <td class="py-3 text-gray-500">${document.getElementById("login-email") ? 'Sep 10 - Sep 14, 2026' : 'Custom Dates'}</td>
-        <td class="py-3 font-medium">${diffDays} Days</td>
-        <td class="py-3"><span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded text-xs border border-amber-200">Pending</span></td>
+      // Add to tracking view list
+      const row = document.createElement("tr");
+      row.className = "hover:bg-gray-50/50 transition-colors font-medium";
+      row.innerHTML = `
+        <td class="py-3.5">${leaveType}</td>
+        <td class="py-3.5 text-gray-500 font-normal">${startDateVal} - ${endDateVal}</td>
+        <td class="py-3.5">${diffDays} Full Day(s)</td>
+        <td class="py-3.5"><span class="inline-flex items-center text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/50">In Queue Verification</span></td>
       `;
-      logBody.insertBefore(newRow, logBody.firstChild);
+      historyTableBody.insertBefore(row, historyTableBody.firstChild);
 
-      // Increment badge values
-      pendingLeaveCount++;
-      const badge = document.getElementById("pending-leave-badge");
-      badge.textContent = `${pendingLeaveCount} Pending`;
-      badge.className = "bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider";
+      // Increment badge tracking targets dynamically
+      computedPendingLeaveRequestsCount++;
+      const pendingBadge = document.getElementById("pending-leave-badge");
+      pendingBadge.textContent = `${computedPendingLeaveRequestsCount} Pending Queue`;
+      pendingBadge.className = "bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider animate-pulse";
 
-      alert("Application logged into processing queue successfully.");
+      // Clear input modules
+      document.getElementById("leave-reason-textarea").value = "";
+      alert("Submission Confirmed: Absence tracking metrics dispatched into HR authorization verification array successfully.");
     }
 
+    // Explicit Session Erasure Routine
     function handleLogout() {
-      currentUser = null;
-      document.getElementById("login-form").reset();
+      // Clear password field entry state parameter securely
+      document.getElementById("password").value = "";
+      
+      // Toggle visible container display state layout wrappers
       document.getElementById("dashboard-screen").classList.add("hidden");
       document.getElementById("login-screen").classList.remove("hidden");
     }
-
-    // First load layout execution bounding script logic mapping setup bounds window hook
-    window.onload = function() {
-      lucide.createIcons();
-    };
   </script>
 </body>
 </html>
