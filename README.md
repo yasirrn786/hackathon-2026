@@ -190,14 +190,5 @@ Dayflow was created as part of **Hackathon 2026**.
 
 The goal was to build a practical HR management platform that makes common HR tasks simpler for both employees and administrators.
 
----
 
-## 🤝 Team
 
-Built with ❤️ by the **Dayflow team**.
-
----
-
-## ⭐ Support
-
-If you like the project, consider giving the repository a ⭐ on GitHub
