@@ -200,4 +200,4 @@ Built with ❤️ by the **Dayflow team**.
 
 ## ⭐ Support
 
-If you like the project, consider giving the repository a ⭐ on GitHub!
+If you like the project, consider giving the repository a ⭐ on GitHub
