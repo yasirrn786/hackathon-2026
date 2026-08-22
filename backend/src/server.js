@@ -1,42 +1,21 @@
 const express = require('express');
 const cors = require('cors');
-
-// Load and validate configuration FIRST. This will exit the process
-// immediately if JWT_SECRET (and, in production, FRONTEND_URL) is missing,
-// so we never accidentally boot with an insecure default.
-const config = require('./config');
+require('dotenv').config();
 const pool = require('./db');
 
 const authRoutes = require('./routes/authRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const leaveRoutes = require('./routes/leaveRoutes');
-const { authenticateToken, requireRole } = require('./middleware/auth');
-const { apiLimiter } = require('./middleware/rateLimit');
+const payrollRoutes = require('./routes/payrollRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
-const PORT = config.PORT;
+const PORT = process.env.PORT || 5000;
 
-// CORS is restricted to the configured frontend origin(s) rather than
-// left wide open. In development with no FRONTEND_URL set, we fall back
-// to allowing any origin so local file:// / live-server testing still
-// works, but this path is blocked outright in production (see config.js).
-const corsOptions = config.ALLOWED_ORIGINS.length > 0
-  ? {
-      origin: (origin, callback) => {
-        // Allow non-browser tools (curl/Postman) that send no Origin header.
-        if (!origin || config.ALLOWED_ORIGINS.includes(origin)) {
-          return callback(null, true);
-        }
-        return callback(new Error('Not allowed by CORS'));
-      },
-      credentials: true,
-    }
-  : {}; // development-only open CORS
-
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
-app.use('/api', apiLimiter);
 
 // Initialize all required database tables safely
 const initDatabase = async () => {
@@ -57,7 +36,7 @@ const initDatabase = async () => {
         user_id INT REFERENCES users(id) ON DELETE CASCADE,
         first_name VARCHAR(50) NOT NULL,
         last_name VARCHAR(50) NOT NULL,
-        email VARCHAR(100) NOT NULL,
+        email VARCHAR(100),
         phone VARCHAR(20) DEFAULT '',
         job_position VARCHAR(100) NOT NULL,
         department VARCHAR(100) DEFAULT 'General',
@@ -65,7 +44,7 @@ const initDatabase = async () => {
         status VARCHAR(20) DEFAULT 'ACTIVE',
         avatar_url TEXT DEFAULT 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
         date_of_joining DATE DEFAULT CURRENT_DATE,
-        date_of_birth DATE DEFAULT '1995-01-01',
+        date_of_birth DATE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
@@ -78,6 +57,8 @@ const initDatabase = async () => {
         work_hours DECIMAL(5,2) DEFAULT 0.00,
         extra_hours DECIMAL(5,2) DEFAULT 0.00,
         status VARCHAR(20) DEFAULT 'ABSENT',
+        overtime_approved BOOLEAN DEFAULT FALSE,
+        overtime_reason TEXT,
         UNIQUE(employee_id, date)
       );
 
@@ -90,6 +71,7 @@ const initDatabase = async () => {
         days_count DECIMAL(4,1) DEFAULT 1.0,
         reason TEXT NOT NULL,
         status VARCHAR(20) DEFAULT 'PENDING',
+        rejection_reason TEXT,
         reviewed_by INT REFERENCES users(id) ON DELETE SET NULL,
         reviewed_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -108,11 +90,45 @@ const initDatabase = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
-      -- Migration additions for existing tables
+      CREATE TABLE IF NOT EXISTS payroll (
+        id SERIAL PRIMARY KEY,
+        employee_id INT REFERENCES employees(id) ON DELETE CASCADE,
+        month INT NOT NULL,
+        year INT NOT NULL,
+        working_days INT DEFAULT 26,
+        present_days INT DEFAULT 0,
+        loss_of_pay_days DECIMAL(4,1) DEFAULT 0.0,
+        gross_salary DECIMAL(10,2),
+        deductions DECIMAL(10,2),
+        net_salary DECIMAL(10,2),
+        status VARCHAR(20) DEFAULT 'DRAFT',
+        processed_by INT REFERENCES users(id) ON DELETE SET NULL,
+        processed_at TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(employee_id, month, year)
+      );
+
+      CREATE TABLE IF NOT EXISTS notifications (
+        id SERIAL PRIMARY KEY,
+        user_id INT REFERENCES users(id) ON DELETE CASCADE,
+        type VARCHAR(50) NOT NULL,
+        title VARCHAR(200) NOT NULL,
+        message TEXT NOT NULL,
+        is_read BOOLEAN DEFAULT FALSE,
+        related_id INT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- Migrations for existing tables
       ALTER TABLE employees ADD COLUMN IF NOT EXISTS email VARCHAR(100);
       ALTER TABLE employees ADD COLUMN IF NOT EXISTS department VARCHAR(100) DEFAULT 'General';
       ALTER TABLE employees ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'ACTIVE';
-      ALTER TABLE employees ADD COLUMN IF NOT EXISTS avatar_url TEXT DEFAULT 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80';
+      ALTER TABLE employees ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+      ALTER TABLE employees ALTER COLUMN date_of_birth DROP NOT NULL;
+      ALTER TABLE employees ALTER COLUMN phone DROP NOT NULL;
+      ALTER TABLE attendance ADD COLUMN IF NOT EXISTS overtime_approved BOOLEAN DEFAULT FALSE;
+      ALTER TABLE attendance ADD COLUMN IF NOT EXISTS overtime_reason TEXT;
+      ALTER TABLE leave_requests ADD COLUMN IF NOT EXISTS rejection_reason TEXT;
     `);
     console.log('Database tables verified and ready.');
   } catch (err) {
@@ -127,64 +143,13 @@ app.use('/api/auth', authRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/leaves', leaveRoutes);
-
-// Salary calculation endpoint
-app.post('/api/salary/calculate', authenticateToken, requireRole(['ADMIN', 'HR']), async (req, res) => {
-  try {
-    const { employeeId, annualCtc } = req.body;
-
-    if (!employeeId || !annualCtc) {
-      return res.status(400).json({ success: false, error: 'Employee ID and Annual CTC are required.' });
-    }
-
-    const ctc = parseFloat(annualCtc);
-    const monthlyCtc = ctc / 12;
-    const basicSalary = monthlyCtc * 0.50;
-    const hra = basicSalary * 0.50;
-    const providentFund = basicSalary * 0.12;
-    const professionalTax = 200.00;
-    const fixedAllowance = monthlyCtc - (basicSalary + hra + providentFund + professionalTax);
-    const netMonthlyTakeHome = (basicSalary + hra + fixedAllowance) - (providentFund + professionalTax);
-
-    const result = await pool.query(
-      `INSERT INTO salaries (employee_id, annual_ctc, basic_salary, hra, provident_fund, professional_tax, fixed_allowance, net_monthly_take_home) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [
-        employeeId, 
-        ctc.toFixed(2), 
-        basicSalary.toFixed(2), 
-        hra.toFixed(2), 
-        providentFund.toFixed(2), 
-        professionalTax.toFixed(2), 
-        fixedAllowance.toFixed(2), 
-        netMonthlyTakeHome.toFixed(2)
-      ]
-    );
-
-    res.status(201).json({
-      success: true,
-      message: 'Salary structure calculated and saved successfully!',
-      breakdown: {
-        annualCtc: ctc.toFixed(2),
-        monthlyCtc: monthlyCtc.toFixed(2),
-        basicSalary: basicSalary.toFixed(2),
-        hra: hra.toFixed(2),
-        providentFund: providentFund.toFixed(2),
-        professionalTax: professionalTax.toFixed(2),
-        fixedAllowance: fixedAllowance.toFixed(2),
-        netMonthlyTakeHome: netMonthlyTakeHome.toFixed(2)
-      },
-      record: result.rows[0]
-    });
-  } catch (err) {
-    console.error('Salary calculation error:', err.message);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
+app.use('/api/payroll', payrollRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Root & Health check endpoints
 app.get('/', (req, res) => {
-  res.json({ message: 'Dayflow HRMS API is running', version: '2.0.0' });
+  res.json({ message: 'Dayflow HRMS API is running', version: '3.0.0', features: ['auth', 'employees', 'attendance', 'leaves', 'payroll', 'analytics', 'notifications'] });
 });
 
 app.get('/api/health', (req, res) => {

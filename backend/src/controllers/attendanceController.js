@@ -1,4 +1,5 @@
 const pool = require('../db');
+const { createNotification, notifyAdmins } = require('./notificationController');
 
 /**
  * Get attendance status for today for logged in user
@@ -90,6 +91,38 @@ async function checkIn(req, res) {
       );
     }
 
+    // Check for late check-in (after 09:30 AM)
+    const lateThreshold = new Date(now);
+    lateThreshold.setHours(9, 30, 0, 0);
+
+    if (now > lateThreshold) {
+      const checkInTimeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+      // Get employee user_id and name
+      const empData = await pool.query(
+        `SELECT u.id as user_id, e.first_name, e.last_name FROM employees e 
+         JOIN users u ON u.id = e.user_id WHERE e.id = $1`, [employeeId]
+      );
+      if (empData.rows.length > 0) {
+        const { user_id, first_name, last_name } = empData.rows[0];
+        const empName = `${first_name} ${last_name}`;
+        // Notify the employee
+        await createNotification(
+          user_id,
+          'LATE_ATTENDANCE',
+          '⚠️ Late Check-In Recorded',
+          `Your check-in at ${checkInTimeStr} is after the standard 9:30 AM. This has been noted.`,
+          result.rows[0].id
+        );
+        // Notify admins
+        await notifyAdmins(
+          'LATE_ATTENDANCE',
+          '⏰ Late Attendance Alert',
+          `${empName} checked in late at ${checkInTimeStr} today.`,
+          result.rows[0].id
+        );
+      }
+    }
+
     res.json({
       success: true,
       message: 'Clocked in successfully!',
@@ -104,6 +137,7 @@ async function checkIn(req, res) {
     res.status(500).json({ success: false, error: 'Check-in failed: ' + err.message });
   }
 }
+
 
 /**
  * Clock Out for today

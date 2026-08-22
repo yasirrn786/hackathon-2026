@@ -1,4 +1,5 @@
 const pool = require('../db');
+const { createNotification, notifyAdmins } = require('./notificationController');
 
 /**
  * Apply for leave (Employee)
@@ -38,10 +39,28 @@ async function applyLeave(req, res) {
       [employeeId, leaveType, startDate, endDate, daysCount, reason]
     );
 
+    const leave = result.rows[0];
+
+    // Get employee name for notification
+    const empRes = await pool.query(
+      `SELECT first_name, last_name FROM employees WHERE id = $1`, [employeeId]
+    );
+    const empName = empRes.rows.length > 0 
+      ? `${empRes.rows[0].first_name} ${empRes.rows[0].last_name}` 
+      : 'An employee';
+
+    // Notify all Admins/HR about the new leave request
+    await notifyAdmins(
+      'PENDING_APPROVAL',
+      '📋 New Leave Request',
+      `${empName} has submitted a ${leaveType} request for ${daysCount} day(s) starting ${startDate}. Review and approve/reject.`,
+      leave.id
+    );
+
     res.status(201).json({
       success: true,
       message: 'Leave request submitted successfully!',
-      leaveRequest: result.rows[0]
+      leaveRequest: leave
     });
   } catch (err) {
     console.error('applyLeave error:', err);
@@ -64,7 +83,6 @@ async function getMyLeaves(req, res) {
       [employeeId]
     );
 
-    // Calculate total approved leave days this year
     const approvedRes = await pool.query(
       `SELECT COALESCE(SUM(days_count), 0) as total_taken 
        FROM leave_requests 
@@ -73,10 +91,9 @@ async function getMyLeaves(req, res) {
       [employeeId]
     );
 
-    const totalAllocated = 24.0; // standard annual allowance
+    const totalAllocated = 24.0;
     const taken = parseFloat(approvedRes.rows[0].total_taken);
     const balance = Math.max(0, totalAllocated - taken);
-
     const pendingCount = result.rows.filter(r => r.status === 'PENDING').length;
 
     res.json({
@@ -102,7 +119,7 @@ async function getAllLeaves(req, res) {
   try {
     const { status } = req.query;
     let query = `
-      SELECT lr.*, e.first_name, e.last_name, e.job_position, e.department, e.avatar_url, u.login_id
+      SELECT lr.*, e.first_name, e.last_name, e.job_position, e.department, e.avatar_url, u.login_id, u.id as user_id
       FROM leave_requests lr
       JOIN employees e ON e.id = lr.employee_id
       JOIN users u ON u.id = e.user_id
@@ -122,6 +139,7 @@ async function getAllLeaves(req, res) {
     const formatted = result.rows.map(row => ({
       id: row.id,
       employeeId: row.employee_id,
+      userId: row.user_id,
       name: `${row.first_name} ${row.last_name}`.trim(),
       loginId: row.login_id,
       jobPosition: row.job_position,
@@ -133,6 +151,8 @@ async function getAllLeaves(req, res) {
       daysCount: row.days_count,
       reason: row.reason,
       status: row.status,
+      rejectionReason: row.rejection_reason,
+      reviewedAt: row.reviewed_at,
       createdAt: row.created_at
     }));
 
@@ -153,7 +173,7 @@ async function getAllLeaves(req, res) {
 async function updateLeaveStatus(req, res) {
   try {
     const { id } = req.params;
-    const { status } = req.body; // 'APPROVED' or 'REJECTED'
+    const { status, rejectionReason } = req.body;
 
     if (!['APPROVED', 'REJECTED'].includes((status || '').toUpperCase())) {
       return res.status(400).json({ 
@@ -163,33 +183,63 @@ async function updateLeaveStatus(req, res) {
     }
 
     const cleanStatus = status.toUpperCase();
-    const reviewerId = req.user.user_id;
+    const reviewerId = req.user.id;
 
-    const result = await pool.query(
-      `UPDATE leave_requests 
-       SET status = $1, reviewed_by = $2, reviewed_at = CURRENT_TIMESTAMP 
-       WHERE id = $3 RETURNING *`,
-      [cleanStatus, reviewerId, id]
-    );
+    // Get the leave request with employee info before updating
+    const leaveInfo = await pool.query(`
+      SELECT lr.*, e.first_name, e.last_name, u.id as user_id
+      FROM leave_requests lr
+      JOIN employees e ON e.id = lr.employee_id
+      JOIN users u ON u.id = e.user_id
+      WHERE lr.id = $1
+    `, [id]);
 
-    if (result.rows.length === 0) {
+    if (leaveInfo.rows.length === 0) {
       return res.status(404).json({ success: false, error: 'Leave request not found.' });
     }
 
+    const leaveData = leaveInfo.rows[0];
+
+    const result = await pool.query(
+      `UPDATE leave_requests 
+       SET status = $1, reviewed_by = $2, reviewed_at = CURRENT_TIMESTAMP,
+           rejection_reason = $3
+       WHERE id = $4 RETURNING *`,
+      [cleanStatus, reviewerId, rejectionReason || null, id]
+    );
+
     const updatedLeave = result.rows[0];
 
-    // If approved and current date falls within leave window, update employee status to ON_LEAVE
+    // If approved and within leave window, update employee status to ON_LEAVE
     if (cleanStatus === 'APPROVED') {
       const today = new Date().toISOString().split('T')[0];
-      const start = new Date(updatedLeave.start_date).toISOString().split('T')[0];
-      const end = new Date(updatedLeave.end_date).toISOString().split('T')[0];
+      const start = new Date(leaveData.start_date).toISOString().split('T')[0];
+      const end = new Date(leaveData.end_date).toISOString().split('T')[0];
 
       if (today >= start && today <= end) {
         await pool.query(
           `UPDATE employees SET status = 'ON_LEAVE' WHERE id = $1`,
-          [updatedLeave.employee_id]
+          [leaveData.employee_id]
         );
       }
+
+      // Notify employee: leave approved
+      await createNotification(
+        leaveData.user_id,
+        'LEAVE_APPROVED',
+        '✅ Leave Request Approved',
+        `Your ${leaveData.leave_type} request for ${leaveData.days_count} day(s) starting ${new Date(leaveData.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} has been approved.`,
+        updatedLeave.id
+      );
+    } else {
+      // Notify employee: leave rejected
+      await createNotification(
+        leaveData.user_id,
+        'LEAVE_REJECTED',
+        '❌ Leave Request Rejected',
+        `Your ${leaveData.leave_type} request for ${leaveData.days_count} day(s) starting ${new Date(leaveData.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} was rejected.${rejectionReason ? ` Reason: ${rejectionReason}` : ''}`,
+        updatedLeave.id
+      );
     }
 
     res.json({
