@@ -28,10 +28,7 @@ const createTables = async () => {
         }
         await tempClient.end();
 
-        // Drop old tables to clear out outdated schemas and rebuild fresh
-        await pool.query(`DROP TABLE IF EXISTS salaries, attendance, employees, users CASCADE;`);
-
-        // Create all tables matching your HRMS specifications using pool
+        // Safe table creation without dropping existing demo data
         await pool.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
